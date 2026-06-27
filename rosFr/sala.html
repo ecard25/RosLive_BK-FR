@@ -1,0 +1,953 @@
+<!-- MARCA: Correcto1 -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sala Virtual en Vivo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Cloudflare RealtimeKit Web Components CDNs -->
+  <script src="https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit@latest/dist/browser.js"></script>
+  <script type="module">
+    import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@latest/loader/index.es2017.js';
+    defineCustomElements();
+  </script>
+
+  <style>
+    /* Tema Claro Premium (Light Mode) */
+    :root {
+      --bg-main: #f8f9fa;
+      --bg-surface: #ffffff;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --primary: #3182ce;
+      --primary-hover: #2b6cb0;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      /* Oculto hasta validación del Cadenero */
+      transition: opacity 0.4s ease;
+    }
+
+    body.ready {
+      opacity: 1;
+    }
+
+    /* Cabecera Superior */
+    .sala-header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-return {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-return:hover {
+      background: #f4f6f9;
+      color: var(--text-main);
+      border-color: #cbd5e0;
+    }
+
+    .fecha-hora {
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 300;
+      background: #f4f6f9;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Área Multimedia Principal */
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Estado de Espera / Placeholder */
+    .placeholder-state {
+      text-align: center;
+      max-width: 500px;
+      background: var(--bg-surface);
+      padding: 3rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .placeholder-state svg {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .placeholder-state h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .placeholder-state p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* Botón Institucional para Iniciar Sesión */
+    .btn-connect {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.875rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      width: 100%;
+    }
+
+    .btn-connect:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(49, 130, 206, 0.35);
+    }
+
+    .btn-connect:disabled {
+      background: #cbd5e0;
+      color: #718096;
+      box-shadow: none;
+      transform: none;
+      cursor: not-allowed;
+    }
+
+    /* Contenedor de la Sala Limpio */
+    .sala-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      box-shadow: var(--shadow-soft);
+      padding: 0.5rem;
+      text-align: center;
+      display: none;
+      overflow: hidden;
+    }
+
+    #mi-video-dyte {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .sala-container.active {
+      display: block;
+      animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Media Query para Celulares */
+    @media (max-width: 600px) {
+      .sala-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .main-content {
+        padding: 1rem;
+      }
+
+      .placeholder-state {
+        padding: 2rem 1.5rem;
+      }
+    }
+
+    /* Estilos de Participantes y Controles de Audio */
+    #audio-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .participant-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .participant-card.speaking {
+      border-color: #38a169;
+      box-shadow: 0 0 20px rgba(56, 161, 105, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1rem;
+    }
+
+    .avatar-circle {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 8px 16px rgba(49, 130, 206, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    /* Pulsación de habla */
+    .participant-card.speaking .avatar-circle {
+      background: #38a169;
+      box-shadow: 0 0 15px rgba(56, 161, 105, 0.5);
+    }
+
+    .participant-card.speaking .avatar-circle::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border: 3px solid #38a169;
+      border-radius: 50%;
+      animation: pulse-glow 1.5s infinite ease-in-out;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes pulse-glow {
+      0% {
+        transform: scale(0.9);
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    .participant-info {
+      text-align: center;
+      width: 100%;
+    }
+
+    .participant-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .participant-role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .mic-badge {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      font-size: 0.9rem;
+    }
+
+    .mic-badge.muted {
+      color: #e53e3e;
+      background: #fff5f5;
+      border-color: #feb2b2;
+    }
+
+    .mic-badge.active {
+      color: #38a169;
+      background: #f0fff4;
+      border-color: #c6f6d5;
+    }
+
+    /* Barra de Controles Superior */
+    .controls-bar {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .control-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover:not(:disabled) {
+      background: #f7fafc;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .control-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+    }
+
+    .control-btn.active:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .control-btn.danger {
+      background: #e53e3e;
+      color: white;
+      border-color: #e53e3e;
+      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+    }
+
+    .control-btn.danger:hover:not(:disabled) {
+      background: #c53030;
+      border-color: #c53030;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="sala-header">
+    <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="4" x2="12" y2="20"></line>
+        <line x1="7" y1="9" x2="17" y2="9"></line>
+      </svg>
+      El Rosario en vivo
+    </div>
+    <div id="fecha-hora" class="fecha-hora">
+      <span id="fecha-hora-texto">Cargando fecha...</span>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <div id="salaContainer" class="sala-container active">
+      <div id="contenedor-clase"
+        style="width: 100%; min-height: 70vh; background-color: var(--bg-surface); display: flex; flex-direction: column; justify-content: flex-start;">
+
+        <!-- Barra de Controles -->
+        <div class="controls-bar">
+          <button id="btnToggleMic" class="control-btn active" disabled>
+            <!-- SVG Micrófono -->
+            <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+            <span id="micText">Iniciando Micrófono...</span>
+          </button>
+
+          <a href="principal.html" class="control-btn danger btn-leave-sala">
+            <!-- SVG Teléfono / Salir -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91">
+              </path>
+              <line x1="23" y1="1" x2="1" y2="23"></line>
+            </svg>
+            <span>Salir del Rosario</span>
+          </a>
+        </div>
+
+        <!-- Grid de Audio de Participantes -->
+        <div id="audio-layout"></div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    // Desregistrar de forma agresiva cualquier service worker y limpiar caché en desarrollo
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function (names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+
+    // Configuración dinámica de API_BASE_URL
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://127.0.0.1:8000/api'
+      : 'https://rosarioenvivo.com/api';
+
+    // Referencia global al meeting activo para la desconexión segura
+    let activeMeeting = null;
+
+    const showError = (message) => {
+      const contenedor = document.getElementById('contenedor-clase');
+      if (contenedor) {
+        contenedor.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2rem; text-align: center; color: var(--text-main);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-main);">Error al iniciar la videoconferencia</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 400px; margin-bottom: 1.5rem; line-height: 1.5;">${message}</p>
+            <a href="principal.html" class="btn-return" style="border-color: var(--border-color); color: var(--text-muted); display: inline-flex; justify-content: center; width: auto; text-decoration: none;">Regresar al inicio</a>
+          </div>
+        `;
+      }
+    };
+
+    function actualizarFechaHora() {
+      const ahora = new Date();
+      const dia = ahora.getDate();
+      const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      const mes = meses[ahora.getMonth()];
+      let horas = ahora.getHours();
+      const ampm = horas >= 12 ? 'pm' : 'am';
+      horas = horas % 12;
+      horas = horas ? horas : 12;
+      const minutos = String(ahora.getMinutes()).padStart(2, '0');
+      
+      const texto = `${dia} de ${mes} ${horas}:${minutos} ${ampm}`;
+      const el = document.getElementById('fecha-hora-texto');
+      if (el) {
+        el.textContent = texto;
+      }
+    }
+
+    /**
+     * Guardia de Ruta (Cadenero Seguro):
+     * Valida inmediatamente la sesión al cargar el documento (DOMContentLoaded)
+     */
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Iniciar reloj
+      actualizarFechaHora();
+      setInterval(actualizarFechaHora, 30000);
+
+      const token = localStorage.getItem('token_sala');
+
+      // Expulsión si no existe rastro del token en el navegador
+      if (!token) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      try {
+        // CORRECCIÓN TÉCNICA: Inyección del String Bearer explícito para OAuth2 en FastAPI
+        const response = await fetch(`${API_BASE_URL}/clase/verificar-acceso`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 401) {
+          throw new Error('Sesión expirada o token inválido detectado por el backend.');
+        }
+
+        if (!response.ok) {
+          throw new Error('No se pudo verificar el acceso a la clase.');
+        }
+
+        const userData = await response.json();
+        const username = userData.nombre_real || localStorage.getItem('nombre_real') || userData.usuario || 'Usuario';
+        const userId = userData.id_usuario ? String(userData.id_usuario) : (userData.usuario || username);
+
+        // Si la seguridad da luz verde, revelamos la interfaz al usuario
+        document.body.classList.add('ready');
+
+        // Inicializar la sala de Dyte
+        await inicializarClaseDyte(token, username, userId);
+
+      } catch (error) {
+        console.error('Violación de acceso interceptada o error de carga:', error.message);
+        if (error.message.includes('Sesión expirada') || error.message.includes('token inválido')) {
+          localStorage.removeItem('token_sala');
+          window.location.replace('login.html');
+        } else {
+          document.body.classList.add('ready');
+          showError(error.message);
+        }
+      }
+    });
+
+    /**
+     * Inicializa el SDK de Dyte y el componente web de la reunión de forma segura
+     */
+    async function inicializarClaseDyte(token, username, userId) {
+      // Determinar preset/rol según el nombre de usuario
+      let presetName = 'group_call_participant';
+      let userRole = 'Estudiante';
+      if (username.toLowerCase().includes('profesor') || username.toLowerCase().includes('docente') || username.toLowerCase().includes('admin')) {
+        presetName = 'group_call_host';
+        userRole = 'Docente';
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/clase/crear-sala`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            client_specific_id: userId,
+            name: username,
+            preset_name: presetName,
+            title: "Clase Virtual"
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Error en el backend al crear la sala.');
+        }
+
+        const data = await response.json();
+
+        if (!data.authToken) {
+          throw new Error('El servidor no retornó un token de acceso a la sala válido.');
+        }
+
+        // Verificar existencia de RealtimeKitClient en el entorno global (y window)
+        if (typeof window.RealtimeKitClient === 'undefined') {
+          throw new Error('El cliente de RealtimeKit no está cargado. Revisa tu conexión a internet.');
+        }
+
+        // Inicialización del SDK de RealtimeKit manteniendo el authToken local en memoria
+        const meeting = await window.RealtimeKitClient.init({
+          authToken: data.authToken,
+          apiBase: 'https://api.realtime.cloudflare.com',
+          baseURI: 'realtime.cloudflare.com',
+          defaults: { audio: false, video: false }
+        });
+
+        // 2. Conexión de audio de Cloudflare RealtimeKit
+        const audioEl = document.createElement('audio');
+        audioEl.autoplay = true;
+        audioEl.style.display = 'none';
+        document.body.appendChild(audioEl);
+
+        const rtkAudio = document.createElement('rtk-participants-audio');
+        document.body.appendChild(rtkAudio);
+        rtkAudio.meeting = meeting;
+        rtkAudio.preloadedAudioElem = audioEl;
+
+        // 3. Te conectas a la sala (Pide micrófono)
+        await meeting.join();
+        activeMeeting = meeting;
+
+        // Polling para auto-expulsión si el administrador finaliza la sala
+        const checkEstadoInterval = setInterval(async () => {
+          try {
+            const res = await fetch(`${API_BASE_URL}/sala/estado/${data.meeting_id}`);
+            if (res.ok) {
+              const estado = await res.json();
+              if (estado.activa === 0) {
+                clearInterval(checkEstadoInterval);
+                console.log("⚠️ La sala ha sido finalizada por el administrador. Auto-expulsando...");
+                
+                if (activeMeeting) {
+                  try {
+                    await activeMeeting.leave();
+                  } catch (leaveErr) {
+                    console.error("Error al salir de la sala:", leaveErr);
+                  }
+                }
+                
+                const salaContainer = document.getElementById('salaContainer');
+                if (salaContainer) {
+                  salaContainer.innerHTML = '';
+                }
+                
+                alert("La sesión ha sido finalizada por el administrador");
+                window.location.href = 'principal.html';
+              }
+            }
+          } catch (err) {
+            console.error("Error al comprobar el estado de la sala:", err);
+          }
+        }, 3000);
+
+        try {
+          if (meeting.participants && typeof meeting.participants.setViewMode === 'function') {
+            meeting.participants.setViewMode('ACTIVE_GRID');
+          }
+        } catch (e) {
+          console.warn("No se pudo establecer viewMode ACTIVE_GRID:", e);
+        }
+
+        console.log("🔥 ID DE ESTA SALA: ", data.meeting_id);
+        console.log("👤 MI USUARIO ES: ", meeting.self.name);
+
+        // --- DEFINICIONES DE ESTADO Y UTILIDADES ANTES DE REGISTRAR EVENTOS ---
+        let currentActiveSpeakerId = null;
+
+        const getParticipantId = (p) => {
+          if (!p) return null;
+          if (typeof p === 'string') return p;
+          return p.peerId || p.id || null;
+        };
+
+        const quenchSpeakingHighlight = (speakerId) => {
+          if (!speakerId) return;
+          const prevEl = document.getElementById(speakerId);
+          if (prevEl) {
+            prevEl.classList.remove('speaking');
+            console.log("🔊 Removiendo clase speaking por silencio/mute de:", speakerId);
+          }
+          if (currentActiveSpeakerId === speakerId) {
+            currentActiveSpeakerId = null;
+          }
+        };
+
+        const updateActiveSpeakerUI = (speakerId) => {
+          if (currentActiveSpeakerId === speakerId) return;
+
+          // Limpiar anterior
+          if (currentActiveSpeakerId) {
+            const prevEl = document.getElementById(currentActiveSpeakerId);
+            if (prevEl) {
+              prevEl.classList.remove('speaking');
+              console.log("🔊 Removiendo clase speaking del anterior hablante:", currentActiveSpeakerId);
+            }
+          }
+
+          // Establecer nuevo
+          currentActiveSpeakerId = speakerId;
+          if (speakerId) {
+            const isLocal = speakerId === meeting.self.id;
+            const pObj = isLocal ? meeting.self : (meeting.participants.joined ? meeting.participants.joined.get(speakerId) : null);
+
+            // Solo iluminar si el participante tiene el micrófono habilitado
+            if (pObj && pObj.audioEnabled) {
+              const currentEl = document.getElementById(speakerId);
+              if (currentEl) {
+                currentEl.classList.add('speaking');
+                console.log("🔊 Añadiendo clase speaking a:", speakerId);
+              }
+            } else {
+              currentActiveSpeakerId = null;
+            }
+          }
+        };
+
+        // Configurar controles de micrófono local
+        const btnToggleMic = document.getElementById('btnToggleMic');
+        const micText = document.getElementById('micText');
+        const micIcon = document.getElementById('micIcon');
+
+        const updateMicButtonState = (enabled) => {
+          if (!btnToggleMic || !micText || !micIcon) return;
+          if (enabled) {
+            btnToggleMic.classList.add('active');
+            btnToggleMic.classList.remove('danger');
+            micText.textContent = "Silenciar micrófono";
+            micIcon.innerHTML = `
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            `;
+          } else {
+            btnToggleMic.classList.remove('active');
+            btnToggleMic.classList.add('danger');
+            micText.textContent = "Activar micrófono";
+            micIcon.innerHTML = `
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+              <path d="M17 11a7 7 0 0 1-2.29 5.17M12 19v4M8 23h8"></path>
+            `;
+          }
+        };
+
+        const container = document.getElementById('audio-layout');
+
+        const dibujarCirculo = (id, nombre, sufijo = "", audioEnabled = true) => {
+          if (!container || document.getElementById(id)) return;
+
+          const card = document.createElement('div');
+          card.id = id;
+          card.className = 'participant-card';
+
+          const validName = nombre || 'Usuario';
+          const initials = validName.charAt(0).toUpperCase();
+          const micClass = audioEnabled ? 'active' : 'muted';
+          const micIconSvg = audioEnabled ? '🎤' : '🔇';
+
+          card.innerHTML = `
+            <div class="mic-badge ${micClass}" id="mic-badge-${id}">
+              ${micIconSvg}
+            </div>
+            <div class="avatar-wrapper">
+              <div class="avatar-circle">
+                ${initials}
+              </div>
+            </div>
+            <div class="participant-info">
+              <div class="participant-name">${validName}</div>
+              <div class="participant-role">${sufijo || 'Participante'}</div>
+            </div>
+          `;
+          container.appendChild(card);
+        };
+
+        const updateParticipantMicUI = (id, audioEnabled) => {
+          const badge = document.getElementById(`mic-badge-${id}`);
+          if (badge) {
+            badge.className = `mic-badge ${audioEnabled ? 'active' : 'muted'}`;
+            badge.innerHTML = audioEnabled ? '🎤' : '🔇';
+          }
+        };
+
+        // --- REGISTRO DE EVENTOS E INICIALIZACIÓN DE LA INTERFAZ ---
+
+        // Habilitar botón y establecer estado inicial
+        if (btnToggleMic) {
+          btnToggleMic.removeAttribute('disabled');
+          updateMicButtonState(meeting.self.audioEnabled);
+
+          btnToggleMic.onclick = async () => {
+            try {
+              btnToggleMic.disabled = true;
+              if (meeting.self.audioEnabled) {
+                await meeting.self.disableAudio();
+              } else {
+                await meeting.self.enableAudio();
+              }
+            } catch (err) {
+              console.error("Error al cambiar estado de audio:", err);
+            } finally {
+              btnToggleMic.disabled = false;
+            }
+          };
+        }
+
+        meeting.self.on('audioUpdate', ({ audioEnabled }) => {
+          updateMicButtonState(audioEnabled);
+          updateParticipantMicUI(meeting.self.id, audioEnabled);
+          // Si nos silenciamos, quitamos el efecto de hablar inmediatamente
+          if (!audioEnabled) {
+            quenchSpeakingHighlight(meeting.self.id);
+          }
+        });
+
+        // Dibujar usuario local
+        dibujarCirculo(meeting.self.id, meeting.self.name, `${userRole} (Tú)`, meeting.self.audioEnabled);
+
+        // Dibujar participantes previos
+        if (meeting.participants && meeting.participants.joined) {
+          const participantesPrevios = meeting.participants.joined.toArray();
+          participantesPrevios.forEach(p => {
+            let role = p.name && (p.name.toLowerCase().includes('profesor') || p.name.toLowerCase().includes('docente')) ? 'Docente' : 'presente';
+            dibujarCirculo(p.id, p.name, role, p.audioEnabled);
+          });
+
+          // Eventos para participantes nuevos
+          meeting.participants.joined.on('participantJoined', (participant) => {
+            let role = participant.name && (participant.name.toLowerCase().includes('profesor') || participant.name.toLowerCase().includes('docente')) ? 'Docente' : 'presente';
+            dibujarCirculo(participant.id, participant.name, role, participant.audioEnabled);
+          });
+
+          meeting.participants.joined.on('audioUpdate', (participant) => {
+            const pId = getParticipantId(participant);
+            updateParticipantMicUI(pId, participant.audioEnabled);
+            // Si un participante se silencia, apagamos su efecto de hablar inmediatamente
+            if (!participant.audioEnabled) {
+              quenchSpeakingHighlight(pId);
+            }
+          });
+
+          meeting.participants.joined.on('participantLeft', (participant) => {
+            const pId = getParticipantId(participant);
+            const card = document.getElementById(pId);
+            if (card) card.remove();
+            quenchSpeakingHighlight(pId);
+          });
+        }
+
+        // Registrar highlight de Active Speaker
+        meeting.participants.on('activeSpeaker', (participant) => {
+          console.log("🔊 Evento activeSpeaker recibido:", participant);
+          const speakerId = getParticipantId(participant);
+          updateActiveSpeakerUI(speakerId);
+        });
+
+      } catch (error) {
+        console.error('Error durante la inicialización de RealtimeKit:', error);
+        showError(error.message);
+      }
+    }
+
+    // Interceptación de salida para liberación controlada de hardware
+    const handleLeave = async (e) => {
+      e.preventDefault();
+      const targetUrl = e.currentTarget.href || 'principal.html';
+
+      if (activeMeeting) {
+        try {
+          const exitButtons = document.querySelectorAll('.btn-leave-sala, .btn-return');
+          exitButtons.forEach(btn => {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.7';
+          });
+
+          await activeMeeting.leave();
+        } catch (err) {
+          console.error("Error al salir de la sala:", err);
+        }
+      }
+      window.location.href = targetUrl;
+    };
+
+    const btnLeave = document.querySelector('.btn-leave-sala');
+    if (btnLeave) btnLeave.addEventListener('click', handleLeave);
+
+    const btnReturn = document.querySelector('.btn-return');
+    if (btnReturn) btnReturn.addEventListener('click', handleLeave);
+
+    // Liberación de hardware en caso de cierre de pestaña o recarga abrupta
+    window.addEventListener('pagehide', () => {
+      if (activeMeeting) {
+        activeMeeting.leave().catch(err => console.error("Error de desconexión en pagehide:", err));
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Plataforma Virtual</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Variables y Reset Global - Light Mode */
+    :root {
+      --bg-base: #f4f6f9;
+      --bg-surface: #ffffff;
+      --bg-surface-hover: #f8fafc;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --primary: #3182ce;
+      --accent: #3182ce;
+      --danger: #e53e3e;
+      --danger-hover: #c53030;
+      --success: #38a169;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      /* Para el efecto fade in post validación */
+      transition: opacity 0.4s ease;
+    }
+
+    /* Ocultar cuerpo hasta validar sesión */
+    body.ready {
+      opacity: 1;
+    }
+
+    /* Barra Superior de Navegación */
+    .navbar {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .username-display {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .btn-logout {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-logout:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Contenido Principal */
+    .main-container {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Cabecera del Dashboard */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .dashboard-header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Botón Imperativo de Acción (Ingreso a Sala) */
+    .btn-action-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-action-primary:hover {
+      background-color: #2b6cb0;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(49, 130, 206, 0.3);
+    }
+
+    /* Grilla de Avisos Generales */
+    .avisos-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .avisos-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .avisos-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .aviso-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.3rem;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .aviso-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(49, 130, 206, 0.3);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .aviso-fecha {
+      font-size: 0.8rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .aviso-titulo {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-main);
+    }
+
+    .aviso-cuerpo {
+      color: var(--text-muted);
+      font-size: 0.6rem;
+      line-height: 1.5;
+    }
+
+    /* Formulario de Petición en Tarjeta */
+    .peticion-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .peticion-textarea {
+      width: 100%;
+      height: 85px;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-family: inherit;
+      font-size: 0.8rem;
+      resize: none;
+      outline: none;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+      color: var(--text-main);
+    }
+
+    .peticion-textarea:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    }
+
+    .btn-peticion-enviar {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-peticion-enviar:hover:not(:disabled) {
+      background-color: #2b6cb0;
+      transform: translateY(-1px);
+    }
+
+    .btn-peticion-enviar:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-peticion-enviar:disabled {
+      background-color: #cbd5e0;
+      color: #718096;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn-action-primary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Barra de Navegación -->
+  <nav class="navbar">
+    <div class="brand" style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="4" x2="12" y2="20"></line>
+        <line x1="7" y1="9" x2="17" y2="9"></line>
+      </svg>
+      El Rosario en vivo
+    </div>
+    <div class="user-menu">
+      <span class="username-display" id="userNameDisplay">Estudiante</span>
+      <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal -->
+  <main class="main-container">
+    <header class="dashboard-header">
+      <h1>Bienvenidos</h1>
+      <!-- Botón de Acción Principal e Imperativo -->
+      <a href="sala.html" class="btn-action-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M 10 3 L 14 3 L 14 7 L 18 7 L 18 11 L 14 11 L 14 21 L 10 21 L 10 11 L 6 11 L 6 7 L 10 7 Z" />
+        </svg>
+        Ir a la sala del Rezo
+      </a>
+    </header>
+
+    <!-- Feed de Avisos -->
+    <section class="avisos-grid">
+      <!-- Aviso 1 -->
+      <article class="aviso-card">
+        <!-- Usamos la pregunta del texto como el título de la tarjeta (sin comillas) -->
+        <h3 class="aviso-titulo">¿Qué es el Rosario?</h3>
+
+        <!-- El cuerpo de la cita empieza directamente con la respuesta -->
+        <blockquote class="aviso-cuerpo"
+          style="font-style: italic; border-left: 3px solid #ccc; padding-left: 10px; margin-bottom: 10px;">
+          "Un compendio del Evangelio. Nos hace volver continuamente a las principales escenas de la
+          vida de Cristo, como para hacernos "respirar" su misterio. El rosario es un camino privilegiado de
+          contemplación. [...] Con el ritmo tranquilo de la repetición del avemaría, el rosario pacifica nuestro corazón
+          y lo abre a la gracia que salva. [...] Que la Virgen del Santo Rosario nos bendiga, mientras nos disponemos a
+          invocarla con la súplica. En su corazón de Madre depositemos nuestras preocupaciones y nuestros propósitos de
+          bien."
+        </blockquote>
+
+        <!-- El crédito con letra un poco más pequeña -->
+        <p style="font-size: 0.6em; opacity: 0.8; margin-top: 5px;">
+          — <strong>Juan Pablo II, <em>Discurso en el Santuario de Pompeya</em> (7 de octubre de 2003)</strong>.
+          <a href="https://www.vatican.va/content/john-paul-ii/es/speeches/2003/october/documents/hf_jp-ii_spe_20031007_shrine-pompei.html"
+            target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Libreria Editrice
+            Vaticana</a>.
+        </p>
+
+      </article>
+
+      <!-- Aviso 2 -->
+      <article class="aviso-card">
+        <h3 class="aviso-titulo">Entrega de Proyectos Finales</h3>
+        <p class="aviso-cuerpo">Las fechas para las entregas de proyectos han sido actualizadas en el calendario
+          académico. Se requiere subirlos en formato PDF.</p>
+      </article>
+
+      <!-- Aviso 3 -->
+      <article class="aviso-card">
+        <h3 class="aviso-titulo">Peticiones</h3>
+        <p class="aviso-cuerpo">Puedes incluir aquí tu petición para ser mencionada en el Rezo del Rosario.</p>
+
+        <!-- Contenedor del Estado de la Petición -->
+        <div id="contenedor-estado-peticion" style="display: none;"></div>
+
+        <!-- Contenedor del Formulario de Petición -->
+        <div id="contenedor-formulario-peticion">
+          <!-- Marcador para funcion -->
+          <label for="peticionInput" class="peticion-label">✝ Agrega tu petición</label>
+          <textarea id="peticionInput" class="peticion-textarea" maxlength="150"
+            placeholder="Escribe tu petición aquí..."></textarea>
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; margin-bottom: 1rem;">
+            <span id="charCounter" style="font-size: 0.75rem; color: var(--text-muted);">150 caracteres restantes</span>
+            <span id="peticionStatus" style="font-size: 0.75rem; font-weight: 500; transition: opacity 0.2s;"></span>
+          </div>
+          <button id="btnEnviarPeticion" class="btn-peticion-enviar">
+            Enviar petición
+          </button>
+        </div>
+
+        <p class="aviso-cuerpo">
+          <strong>Nota: </strong>Toma en cuenta que las peticiones registradas aplican únicamente para el día actual y
+          serán colocadas en el <strong><em>Listado de peticiones</em></strong> mientras te encuentres en la sala.
+        </p>
+      </article>
+
+    </section>
+  </main>
+
+  <script>
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://127.0.0.1:8000/api'
+      : 'https://rosarioenvivo.com/api';
+
+    /**
+     * Seguridad de Ruta: Validación Blindada
+     */
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token_sala');
+
+      // 1. Si no hay token, al login
+      if (!token) {
+        console.warn("No se encontró token en LocalStorage.");
+        window.location.replace("login.html");
+        return;
+      }
+
+      try {
+        // 2. Petición al backend
+        const response = await fetch(`${API_BASE_URL}/clase/verificar-acceso`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // CORRECCIÓN DE SEGURIDAD: Solo expulsar si el servidor dice explícitamente que no estás autorizado
+        if (response.status === 401) {
+          throw new Error('Sesión expirada o token inválido.');
+        }
+
+        if (!response.ok) {
+          // Si es otro tipo de error (500, 502), mostramos el UI de todos modos para no bloquearte por red
+          console.error("Error intermitente del servidor, pero permitiendo acceso local.");
+          document.body.classList.add('ready');
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Acceso concedido para:", data.usuario);
+
+        const displayName = data.nombre_real || localStorage.getItem('nombre_real') || data.usuario || 'Estudiante';
+        const userNameDisplayEl = document.getElementById('userNameDisplay');
+        if (userNameDisplayEl) {
+          userNameDisplayEl.textContent = displayName;
+        }
+
+        // 3. Todo bien, mostramos la interfaz Glassmorphic
+        document.body.classList.add('ready');
+
+        // Verificar si ya envió una petición hoy
+        await verificarEstadoPeticionHoy(token);
+
+      } catch (error) {
+        console.error('Protección de ruta activa:', error.message);
+        localStorage.clear();
+        window.location.replace("login.html");
+      }
+    });
+
+    // Lógica de Logout
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+      btnLogout.addEventListener('click', () => {
+        localStorage.clear();
+        window.location.replace("login.html");
+      });
+    }
+
+    // Lógica para enviar petición al backend
+    const peticionInput = document.getElementById('peticionInput');
+    const charCounter = document.getElementById('charCounter');
+    const peticionStatus = document.getElementById('peticionStatus');
+    const btnEnviarPeticion = document.getElementById('btnEnviarPeticion');
+
+    if (peticionInput && charCounter) {
+      peticionInput.addEventListener('input', () => {
+        const remaining = 150 - peticionInput.value.length;
+        charCounter.textContent = `${remaining} caracteres restantes`;
+      });
+    }
+
+    if (btnEnviarPeticion && peticionInput) {
+      btnEnviarPeticion.addEventListener('click', async () => {
+        const texto = peticionInput.value.trim();
+        if (!texto) {
+          showStatus('Por favor escribe tu petición.', 'var(--danger)');
+          return;
+        }
+
+        if (texto.length > 150) {
+          showStatus('La petición excede los 150 caracteres.', 'var(--danger)');
+          return;
+        }
+
+        const token = localStorage.getItem('token_sala');
+        if (!token) {
+          window.location.replace("login.html");
+          return;
+        }
+
+        // Bloquear UI durante envío
+        btnEnviarPeticion.disabled = true;
+        btnEnviarPeticion.textContent = 'Enviando...';
+        showStatus('', '');
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/peticiones`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ peticion: texto })
+          });
+
+          if (response.status === 401) {
+            localStorage.clear();
+            window.location.replace("login.html");
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error('Error al registrar la petición');
+          }
+
+          const data = await response.json();
+          console.log("Petición registrada:", data);
+
+          // Limpiar input
+          peticionInput.value = '';
+          charCounter.textContent = '150 caracteres restantes';
+
+          // Ocultar formulario e inmediatamente pintar en su lugar el texto de la petición
+          const formContainer = document.getElementById('contenedor-formulario-peticion');
+          const statusContainer = document.getElementById('contenedor-estado-peticion');
+          if (formContainer && statusContainer) {
+            formContainer.style.display = 'none';
+            statusContainer.style.display = 'block';
+            statusContainer.innerHTML = `
+              <div style="background-color: #f0fff4; border: 1px solid #c6f6d5; border-radius: 8px; padding: 1rem; color: #276749; font-size: 0.85rem; line-height: 1.4; margin-top: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(56, 161, 105, 0.05);">
+                <strong style="display: block; margin-bottom: 0.4rem; font-size: 0.9rem;">✓ Ya enviaste tu petición de hoy:</strong>
+                <span style="font-style: italic; color: #2f855a; display: block; border-left: 2px solid #38a169; padding-left: 8px; margin-top: 0.25rem; font-size: 0.8rem; word-break: break-word;">
+                  "${texto}"
+                </span>
+              </div>
+            `;
+          }
+
+        } catch (error) {
+          console.error(error);
+          showStatus('No se pudo enviar la petición.', 'var(--danger)');
+        } finally {
+          btnEnviarPeticion.disabled = false;
+          btnEnviarPeticion.textContent = 'Enviar petición';
+        }
+      });
+    }
+
+    function showStatus(msg, color) {
+      if (peticionStatus) {
+        peticionStatus.textContent = msg;
+        peticionStatus.style.color = color;
+        peticionStatus.style.opacity = msg ? '1' : '0';
+      }
+    }
+
+    /**
+     * Verifica si el usuario ya envió una petición hoy para pintar el estado
+     */
+    async function verificarEstadoPeticionHoy(token) {
+      const formContainer = document.getElementById('contenedor-formulario-peticion');
+      const statusContainer = document.getElementById('contenedor-estado-peticion');
+
+      if (!formContainer || !statusContainer) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/peticiones/estado_hoy`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al verificar el estado de la petición de hoy');
+        }
+
+        const data = await response.json();
+
+        if (data.ya_envio) {
+          formContainer.style.display = 'none';
+          statusContainer.style.display = 'block';
+          statusContainer.innerHTML = `
+            <div style="background-color: #f0fff4; border: 1px solid #c6f6d5; border-radius: 8px; padding: 1rem; color: #276749; font-size: 0.85rem; line-height: 1.4; margin-top: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(56, 161, 105, 0.05);">
+              <strong style="display: block; margin-bottom: 0.4rem; font-size: 0.9rem;">✓ Ya enviaste tu petición de hoy:</strong>
+              <span style="font-style: italic; color: #2f855a; display: block; border-left: 2px solid #38a169; padding-left: 8px; margin-top: 0.25rem; font-size: 0.8rem; word-break: break-word;">
+                "${data.peticion}"
+              </span>
+            </div>
+          `;
+        } else {
+          formContainer.style.display = 'block';
+          statusContainer.style.display = 'none';
+          statusContainer.innerHTML = '';
+        }
+      } catch (error) {
+        console.error('Error verificando estado de petición:', error);
+        // En caso de error, dejamos el formulario por seguridad
+        formContainer.style.display = 'block';
+        statusContainer.style.display = 'none';
+      }
+    }
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sala Virtual en Vivo - Whereby Pro</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Tema Claro Premium (Light Mode) */
+    :root {
+      --bg-main: #f8f9fa;
+      --bg-surface: #ffffff;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --primary: #3182ce;
+      --primary-hover: #2b6cb0;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      opacity: 0; /* Oculto hasta validación del Cadenero */
+      transition: opacity 0.4s ease;
+    }
+
+    body.ready {
+      opacity: 1;
+    }
+
+    /* Cabecera Superior */
+    .sala-header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-return {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-return:hover {
+      background: #f4f6f9;
+      color: var(--text-main);
+      border-color: #cbd5e0;
+    }
+
+    /* Área Multimedia Principal */
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Estado de Espera / Placeholder */
+    .placeholder-state {
+      text-align: center;
+      max-width: 500px;
+      background: var(--bg-surface);
+      padding: 3rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .placeholder-state svg {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .placeholder-state h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .placeholder-state p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* Botón Institucional para Iniciar Sesión */
+    .btn-connect {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.875rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      width: 100%;
+    }
+
+    .btn-connect:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(49, 130, 206, 0.35);
+    }
+
+    .btn-connect:disabled {
+      background: #cbd5e0;
+      color: #718096;
+      box-shadow: none;
+      transform: none;
+      cursor: not-allowed;
+    }
+
+    /* Contenedor Adaptativo del Iframe (Whereby Pro) */
+    .video-wrapper {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      
+      /* Mobile First: Formato vertical de inicio */
+      aspect-ratio: 9 / 16;
+      height: auto;
+      
+      display: none; /* Oculto por defecto hasta inyectar URL */
+    }
+
+    .video-wrapper.active {
+      display: block;
+      animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .video-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Media Query Responsiva para Laptop / Escritorios */
+    @media (min-width: 768px) {
+      .video-wrapper {
+        aspect-ratio: 16 / 9; /* Relación de aspecto cinemática óptima */
+      }
+    }
+
+    /* Media Query para Celulares */
+    @media (max-width: 600px) {
+      .sala-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .main-content {
+        padding: 1rem;
+      }
+      .placeholder-state {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="sala-header">
+    <div class="brand-title">Sala Interactiva</div>
+    <a href="principal.html" class="btn-return">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Volver al Dashboard
+    </a>
+  </header>
+
+  <main class="main-content">
+    
+    <div id="connectionPlaceholder" class="placeholder-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+      <h2>Sesión Virtual</h2>
+      <p>Estás a un clic de ingresar a tu clase en vivo. Por favor, asegúrate de tener conexión estable.</p>
+      
+      <button id="btnConnect" class="btn-connect">
+        Iniciar Sesión en Vivo
+      </button>
+    </div>
+
+    <div id="videoContainer" class="video-wrapper">
+      <iframe 
+        id="wherebyFrame"
+        allow="camera; microphone; fullscreen; speaker-selection; display-capture"
+        title="Videollamada Inmersiva Whereby Pro">
+      </iframe>
+    </div>
+
+  </main>
+
+  <script>
+    // URL base de tu ecosistema FastAPI local
+    const BACKEND_URL = "http://localhost:8000";
+
+    /**
+     * Guardia de Ruta (Cadenero Seguro):
+     * Valida inmediatamente la sesión al cargar el documento (DOMContentLoaded)
+     */
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token_sala');
+      
+      // Expulsión si no existe rastro del token en el navegador
+      if (!token) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      try {
+        // CORRECCIÓN TÉCNICA: Inyección del String Bearer explícito para OAuth2 en FastAPI
+        const response = await fetch(`${BACKEND_URL}/api/clase/verificar-acceso`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 401) {
+          throw new Error('Sesión expirada o token inválido detectado por el backend.');
+        }
+
+        if (!response.ok) {
+          console.warn('Advertencia de conexión, procediendo bajo modo local seguro.');
+        }
+
+        // Si la seguridad da luz verde, revelamos la interfaz al usuario
+        document.body.classList.add('ready');
+
+      } catch (error) {
+        console.error('Violación de acceso interceptada:', error.message);
+        // Se destruyen las credenciales muertas y se fuerza la salida limpia
+        localStorage.removeItem('token_sala');
+        window.location.replace('login.html');
+      }
+    });
+
+    /**
+     * Consumo Asíncrono de la API de Whereby Pro
+     */
+    const btnConnect = document.getElementById('btnConnect');
+    const placeholder = document.getElementById('connectionPlaceholder');
+    const videoContainer = document.getElementById('videoContainer');
+    const wherebyFrame = document.getElementById('wherebyFrame');
+
+    btnConnect.addEventListener('click', async () => {
+      // Prevención defensiva de envíos múltiples deshabilitando el botón de acción
+      btnConnect.disabled = true;
+      btnConnect.innerHTML = 'Generando entorno seguro...';
+
+      const token = localStorage.getItem('token_sala');
+
+      try {
+        // Solicitamos la URL efímera codificada a FastAPI
+        const response = await fetch(`${BACKEND_URL}/api/clase/crear-sala`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error en el servidor al crear la sala: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // CORRECCIÓN TÉCNICA CRÍTICA: Mapeo correcto de 'roomUrl' devuelto por el Backend
+        const targetRoomUrl = data.roomUrl || data.url;
+
+        if (targetRoomUrl) {
+          // Inyectamos la URL directamente en RAM al src del iframe por estricta seguridad
+          wherebyFrame.src = targetRoomUrl;
+          
+          // Transición de la interfaz: ocultamos el aviso y desplegamos el video-wrapper responsivo
+          placeholder.style.display = 'none';
+          videoContainer.classList.add('active');
+          console.log("Handshake de videoconferencia WebRTC establecido de forma exitosa.");
+        } else {
+          throw new Error('La respuesta del backend no contiene una propiedad de sala válida.');
+        }
+
+      } catch (error) {
+        console.error('Fallo durante el handshake con la sala:', error);
+        alert('No se pudo establecer la conexión con la sala en vivo. Intenta de nuevo.');
+        
+        // Restauramos el botón y estado visual en caso de anomalía de red
+        btnConnect.disabled = false;
+        btnConnect.innerHTML = 'Iniciar Sesión en Vivo';
+      }
+    });
+  </script>
+</body>
+</html>

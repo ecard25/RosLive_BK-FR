@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Plataforma Virtual</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Variables y Reset Global */
+    :root {
+      --bg-base: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-surface-hover: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --accent: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      opacity: 0; /* Para el efecto fade in post validación */
+      transition: opacity 0.4s ease;
+    }
+
+    /* Ocultar cuerpo hasta validar sesión */
+    body.ready {
+      opacity: 1;
+    }
+
+    /* Barra Superior de Navegación */
+    .navbar {
+      background-color: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .username-display {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .btn-logout {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-logout:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Contenido Principal */
+    .main-container {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Cabecera del Dashboard */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .dashboard-header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    /* Botón Imperativo de Acción (Ingreso a Sala) */
+    .btn-action-primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-action-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+
+    /* Grilla de Avisos Generales */
+    .avisos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .aviso-card {
+      background-color: var(--bg-surface);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .aviso-card:hover {
+      transform: translateY(-5px);
+      background-color: var(--bg-surface-hover);
+    }
+
+    .aviso-fecha {
+      font-size: 0.8rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .aviso-titulo {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-main);
+    }
+
+    .aviso-cuerpo {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .btn-action-primary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación -->
+  <nav class="navbar">
+    <div class="brand">Plataforma EduConnect</div>
+    <div class="user-menu">
+      <span class="username-display" id="userNameDisplay">Estudiante</span>
+      <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal -->
+  <main class="main-container">
+    <header class="dashboard-header">
+      <h1>Avisos Generales</h1>
+      <!-- Botón de Acción Principal e Imperativo -->
+      <a href="sala.html" class="btn-action-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        Ir a la Sala Virtual
+      </a>
+    </header>
+
+    <!-- Feed de Avisos -->
+    <section class="avisos-grid">
+      <article class="aviso-card">
+        <span class="aviso-fecha">HOY, 10:00 AM</span>
+        <h3 class="aviso-titulo">Nueva Metodología del Curso</h3>
+        <p class="aviso-cuerpo">Recuerden que a partir de esta semana implementaremos la metodología de aula invertida. Por favor revisen el material antes de la sesión.</p>
+      </article>
+
+      <article class="aviso-card">
+        <span class="aviso-fecha">AYER, 14:30 PM</span>
+        <h3 class="aviso-titulo">Entrega de Proyectos Finales</h3>
+        <p class="aviso-cuerpo">Las fechas para las entregas de proyectos han sido actualizadas en el calendario académico. Se requiere subirlos en formato PDF.</p>
+      </article>
+
+      <article class="aviso-card">
+        <span class="aviso-fecha">12 JUN, 09:15 AM</span>
+        <h3 class="aviso-titulo">Mantenimiento Programado</h3>
+        <p class="aviso-cuerpo">La plataforma estará en mantenimiento el domingo a las 2AM durante 1 hora. El acceso a salas virtuales no se verá afectado en ese lapso.</p>
+      </article>
+    </section>
+  </main>
+
+  <script>
+	  /**
+	   * Seguridad y Validación de Sesión Frontend Extrema.
+	   * Se ejecuta en DOMContentLoaded para bloquear el renderizado si el token no es válido.
+	   */
+	  document.addEventListener('DOMContentLoaded', async () => {
+		const token = localStorage.getItem('token_sala');
+		const errorMsg = document.getElementById('errorMsg') || document.getElementById('mensaje-error');
+		
+		// 1. Bloqueo inmediato en cliente: Si no hay token, abortar sin pestañear
+		if (!token) {
+		  console.log("No se encontró token de sesión.");
+		  localStorage.removeItem('token_sala');
+		  window.location.replace("login.html");
+		  return;
+		}
+
+		try {
+		  // 2. Validación síncrona/remota contra tu FastAPI
+		  const response = await fetch('http://localhost:8000/api/clase/verificar-acceso', {
+			method: 'GET',
+			headers: {
+			  'Authorization': `Bearer ${token}`,
+			  'Content-Type': 'application/json'
+			}
+		  });
+
+		  // Si el backend te rechaza (401, 403, 404, etc.)
+		  if (!response.ok || response.status === 401) {
+			throw new Error('Sesión inválida o expirada en el servidor remoto');
+		  }
+
+		  const data = await response.json();
+		  console.log("Acceso autorizado para el usuario:", data.usuario);
+
+		  // 3. Éxito: Revelamos la interfaz Glassmorphic de forma segura
+		  document.body.classList.add('ready');
+
+		} catch (error) {
+		  console.warn('Protección de ruta activa:', error.message);
+		  
+		  // Limpieza atómica del almacenamiento para evitar bucles corruptos
+		  localStorage.clear();
+		  window.location.replace("login.html");
+		}
+	  });
+
+	  /**
+	   * Lógica de Cierre de Sesión Blindada
+	   */
+	  const btnLogout = document.getElementById('btnLogout');
+	  if (btnLogout) {
+		btnLogout.addEventListener('click', () => {
+		  localStorage.clear();
+		  window.location.replace("login.html");
+		});
+	  }
+	</script>
+</body>
+</html>

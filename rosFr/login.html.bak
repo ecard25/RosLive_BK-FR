@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso - Plataforma Virtual</title>
+  
+  <!-- Configuración PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3b82f6">
+
+  <!-- Tipografía moderna (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Reset y Variables Globales */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Diseño Glassmorphism para la Tarjeta de Login */
+    .login-wrapper {
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+      perspective: 1000px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.8s ease-out forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .login-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Formularios y Controles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.875rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-control::placeholder {
+      color: #64748b;
+    }
+
+    /* Botón de Acción Principal */
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Mensaje de Error */
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.875rem;
+      text-align: center;
+      margin-top: 1rem;
+      min-height: 1.2rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .error-msg.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>Bienvenido</h1>
+        <p>Inicia sesión para continuar al dashboard</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" class="form-control" placeholder="Nombre de usuario" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="contrasena">Contraseña</label>
+          <input type="password" id="contrasena" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">Entrar a la Plataforma</button>
+        <div id="errorMsg" class="error-msg">Credenciales incorrectas o error de conexión.</div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Registro básico del Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('Fallo registro ServiceWorker:', err);
+        });
+      });
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    const usuarioInput = document.getElementById('usuario');
+    const contrasenaInput = document.getElementById('contrasena');
+    const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    /**
+     * Intercepta el evento submit para enviar peticiones al backend mediante API Fetch.
+     */
+	loginForm.addEventListener('submit', async (e) => {
+	  e.preventDefault(); // Previene recarga de página por defecto
+
+	  const usuario = usuarioInput.value.trim();
+	  const contrasena = contrasenaInput.value.trim();
+
+	  // Validación simple
+	  if (!usuario || !contrasena) return;
+
+	  // Estado de carga
+	  submitBtn.textContent = "Verificando...";
+	  submitBtn.disabled = true;
+	  submitBtn.style.opacity = '0.7';
+	  errorMsg.classList.remove('visible');
+
+	  try {
+		# Petición POST JSON al backend (FastAPI)
+		const response = await fetch('http://localhost:8000/api/usuarios/login', {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json'
+		  },
+		  body: JSON.stringify({ usuario, contrasena })
+		});
+
+		if (!response.ok) {
+		  throw new Error('Autenticación fallida');
+		}
+
+		const data = await response.json();
+
+		# CORRECCIÓN CRÍTICA: Se añade soporte para 'access_token' que es el estándar de FastAPI
+		const tokenValido = data.access_token || data.token;
+
+		# Al recibir el token, lo guardamos en el almacenamiento local del navegador
+		if (tokenValido) {
+		  localStorage.setItem('token_sala', tokenValido);
+		  # Redirección imperativa al Dashboard principal
+		  window.location.href = "principal.html";
+		} else {
+		  throw new Error('El backend no retornó un token válido');
+		}
+
+	  } catch (error) {
+		console.error('Error durante el login:', error);
+		errorMsg.classList.add('visible');
+	  } finally {
+		# Restaurar estado del botón
+		submitBtn.textContent = "Entrar a la Plataforma";
+		submitBtn.disabled = false;
+		submitBtn.style.opacity = '1';
+	  }
+	});
+  </script>
+</body>
+</html>

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - RosLive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0f172a;
+      --bg-surface: rgba(30, 41, 59, 0.7);
+      --bg-surface-hover: rgba(30, 41, 59, 0.9);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1e293b, #0f172a);
+      color: var(--text-main);
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    body.ready {
+      opacity: 1;
+    }
+
+    .navbar {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .btn-nav {
+      background: transparent;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-nav:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-color);
+    }
+
+    .btn-logout {
+      color: var(--danger);
+    }
+
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2rem;
+      gap: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .admin-card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: var(--shadow-soft);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .admin-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--danger));
+    }
+
+    .icon-wrapper {
+      width: 80px;
+      height: 80px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      color: var(--danger);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+      }
+    }
+
+    .title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+
+    .description {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-action-danger {
+      width: 100%;
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 1.1rem 2rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-action-danger:hover:not(:disabled) {
+      background-color: var(--danger-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-action-danger:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-action-danger:disabled {
+      background-color: #4b5563;
+      color: #9ca3af;
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.6;
+    }
+
+    .status-msg {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      min-height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .status-msg.show {
+      opacity: 1;
+    }
+
+    .status-msg.success {
+      color: var(--success);
+    }
+
+    .status-msg.error {
+      color: var(--danger);
+    }
+
+    .status-msg.info {
+      color: var(--primary);
+    }
+
+    /* Estilos del Monitor Realtime */
+    .monitor-card {
+      padding: 2.5rem 2.5rem 2rem;
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--primary);
+    }
+
+    .monitor-status {
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 1.25rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      margin: 1.5rem 0;
+      transition: all 0.3s ease;
+      line-height: 1.4;
+    }
+
+    .monitor-status.safe {
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .monitor-status.warning {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-refrescar {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      margin-top: 0.5rem;
+    }
+
+    .btn-refrescar:hover:not(:disabled) {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--primary);
+    }
+
+    .btn-refrescar:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .salas-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: left;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .sala-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .sala-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .sala-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      max-width: 70%;
+    }
+
+    .sala-id {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    .sala-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .sala-participants {
+      font-size: 0.8rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .btn-kill-sala {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-kill-sala:hover:not(:disabled) {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .btn-kill-sala:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-action-nuclear {
+      width: 100%;
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: white;
+      border: none;
+      padding: 1.1rem 2rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 1rem;
+    }
+
+    .btn-action-nuclear:hover:not(:disabled) {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(220, 38, 38, 0.6);
+    }
+    
+    .btn-action-nuclear:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-action-nuclear:disabled {
+      background: #4b5563;
+      color: #9ca3af;
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg);">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+      </svg>
+      RosLive Admin
+    </div>
+    <div class="nav-links">
+      <a href="principal.html" class="btn-nav">Volver al Panel</a>
+      <button class="btn-nav btn-logout" id="btnLogout">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Tarjeta de Monitoreo Realtime -->
+    <div class="admin-card monitor-card">
+      <h2 class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+          <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+        </svg>
+        Estado del Servidor Cloudflare en Vivo
+      </h2>
+      <p class="description">
+        Muestra la cantidad de salas de videoconferencias activas en tiempo real y el número total de participantes consumiendo minutos en Cloudflare.
+      </p>
+      
+      <div id="monitorStatus" class="monitor-status">
+        Cargando estado del servidor...
+      </div>
+
+      <div id="salasList" class="salas-list" style="display: none;">
+        <!-- Lista de salas activas dinámicas -->
+      </div>
+      
+      <button id="btnRefrescar" class="btn-refrescar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+        </svg>
+        Refrescar Estado
+      </button>
+    </div>
+
+    <div class="admin-card">
+      <div class="icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <h1 class="title">Control de Videoconferencias</h1>
+      <p class="description">
+        Esta acción forzará el cierre inmediato de todas las conexiones activas en Cloudflare RealtimeKit/Dyte y marcará la sala actual como inactiva. Úsalo para evitar consumos no deseados de minutos.
+      </p>
+
+      <button id="btnForzarCierre" class="btn-action-danger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+        </svg>
+        Cerrar todas las conexiones activas
+      </button>
+
+      <button id="btnPurgaNuclear" class="btn-action-nuclear">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 22 22 22 12 2"></polygon>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        💥 Ejecutar Purga Nuclear (Cerrar TODO en Cloudflare)
+      </button>
+
+      <div id="statusMsg" class="status-msg"></div>
+    </div>
+  </main>
+
+  <script>
+    // Configuración adaptativa de API_BASE_URL
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://127.0.0.1:8000/api'
+      : 'https://rosarioenvivo.com/api';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token_sala');
+
+      // 1. Protección de Ruta: Si no hay token, expulsar al login
+      if (!token) {
+        window.location.replace("login.html");
+        return;
+      }
+
+      try {
+        // Verificar validez del token en el backend
+        const response = await fetch(`${API_BASE_URL}/clase/verificar-acceso`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('No autorizado');
+        }
+
+        // Si la sesión es válida, hacer visible la interfaz
+        document.body.classList.add('ready');
+        
+        // Inicializar monitor en vivo
+        refrescarMonitoreo();
+
+      } catch (error) {
+        localStorage.clear();
+        window.location.replace("login.html");
+      }
+    });
+
+    // Evento de Cerrar Sesión
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.replace("login.html");
+    });
+
+    // Lógica del Monitor Realtime
+    const monitorStatus = document.getElementById('monitorStatus');
+    const salasList = document.getElementById('salasList');
+    const btnRefrescar = document.getElementById('btnRefrescar');
+
+    async function refrescarMonitoreo() {
+      const token = localStorage.getItem('token_sala');
+      if (!token) return;
+
+      btnRefrescar.disabled = true;
+      const originalText = btnRefrescar.innerHTML;
+      btnRefrescar.innerHTML = `
+        <svg class="spinner" width="16" height="16" viewBox="0 0 50 50" style="animation: spin 1s linear infinite; margin-right: 0.25rem; display: inline-block; vertical-align: middle; stroke: currentColor;">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" style="stroke-dasharray: 80, 200; stroke-dashoffset: 0;"></circle>
+        </svg>
+        Cargando...
+      `;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/monitoreo_realtime`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al consultar el monitor de Cloudflare');
+        }
+
+        const data = await response.json();
+        const salasActivas = data.salas_activas_en_cloudflare;
+        const totalParticipantes = data.total_participantes_activos;
+
+        if (salasActivas === 0) {
+          monitorStatus.className = 'monitor-status safe';
+          monitorStatus.innerHTML = `🟢 Cero conexiones activas. No estás consumiendo minutos.`;
+          salasList.style.display = 'none';
+          salasList.innerHTML = '';
+        } else {
+          monitorStatus.className = 'monitor-status warning';
+          monitorStatus.innerHTML = `🔴 ¡Atención! Hay ${salasActivas} sala(s) activa(s) transmitiendo en este momento.<br>
+            <span style="font-size: 0.95rem; font-weight: 500; opacity: 0.9;">Total de participantes consumiendo: ${totalParticipantes}</span>`;
+          
+          // Listar salas
+          salasList.style.display = 'flex';
+          salasList.innerHTML = '';
+          data.detalles.forEach(sala => {
+            const item = document.createElement('div');
+            item.className = 'sala-item';
+            item.innerHTML = `
+              <div class="sala-info">
+                <span class="sala-title">${sala.title}</span>
+                <span class="sala-id">ID: ${sala.meeting_id}</span>
+                <span class="sala-participants">👥 ${sala.participantes_activos} participantes</span>
+              </div>
+              <button class="btn-kill-sala" onclick="tronarSala('${sala.meeting_id}')">
+                Tronar
+              </button>
+            `;
+            salasList.appendChild(item);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        monitorStatus.className = 'monitor-status';
+        monitorStatus.innerHTML = `✗ Error al consultar el servidor: ${err.message}`;
+      } finally {
+        btnRefrescar.disabled = false;
+        btnRefrescar.innerHTML = originalText;
+      }
+    }
+
+    async function tronarSala(meetingId) {
+      const confirmacion = confirm(`¿Estás seguro de que deseas forzar el cierre de la sala ${meetingId}?`);
+      if (!confirmacion) return;
+
+      const token = localStorage.getItem('token_sala');
+      if (!token) return;
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Cerrando...';
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/sala/forzar_cierre?meeting_id=${meetingId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          alert(`Éxito: Sala cerrada. Código Cloudflare: ${data.cloudflare_status}`);
+          await refrescarMonitoreo();
+        } else {
+          throw new Error(data.detail || 'Error al cerrar sala');
+        }
+      } catch (err) {
+        console.error(err);
+        alert(`Error al cerrar sala: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Tronar';
+      }
+    }
+
+    // Registrar evento de refrescar y hacer global la función tronarSala
+    btnRefrescar.addEventListener('click', refrescarMonitoreo);
+    window.tronarSala = tronarSala;
+
+    // Lógica para forzar el cierre
+    const btnForzarCierre = document.getElementById('btnForzarCierre');
+    const statusMsg = document.getElementById('statusMsg');
+
+    btnForzarCierre.addEventListener('click', async () => {
+      const confirmacion = confirm("¿Estás seguro de que deseas forzar el cierre de todas las conexiones activas en Cloudflare RealtimeKit? Esta acción expulsará a todos los participantes rezando.");
+      
+      if (!confirmacion) return;
+
+      const token = localStorage.getItem('token_sala');
+      if (!token) {
+        window.location.replace("login.html");
+        return;
+      }
+
+      // Bloquear botón y mostrar feedback visual
+      btnForzarCierre.disabled = true;
+      const originalContent = btnForzarCierre.innerHTML;
+      btnForzarCierre.innerHTML = `
+        <svg class="spinner" width="20" height="20" viewBox="0 0 50 50" style="animation: spin 1s linear infinite; margin-right: 0.5rem; display: inline-block; vertical-align: middle;">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" style="stroke-dasharray: 80, 200; stroke-dashoffset: 0;"></circle>
+        </svg>
+        Procesando cierre...
+      `;
+      showStatus("Enviando petición de purga...", "info");
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/sala/forzar_cierre`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 401) {
+          localStorage.clear();
+          window.location.replace("login.html");
+          return;
+        }
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showStatus(`✓ ${data.message || data.mensaje}`, "success");
+          alert(`Éxito: Sala ${data.meeting_id} cerrada. Código de respuesta de Cloudflare: ${data.cloudflare_status}`);
+        } else {
+          throw new Error(data.detail || "Error en el servidor");
+        }
+
+      } catch (error) {
+        console.error(error);
+        showStatus(`✗ Error: ${error.message}`, "error");
+        alert(`Error al procesar: ${error.message}`);
+      } finally {
+        btnForzarCierre.disabled = false;
+        btnForzarCierre.innerHTML = originalContent;
+      }
+    });
+
+    // Lógica para Purga Nuclear Directa a Cloudflare (salas antiguas y zombies)
+    const btnPurgaNuclear = document.getElementById('btnPurgaNuclear');
+
+    btnPurgaNuclear.addEventListener('click', async () => {
+      const confirmacion = confirm("⚠️ ¡ADVERTENCIA NUCLEAR! ⚠️\nEsto forzará el cierre de absolutamente TODAS las videoconferencias activas en Cloudflare RealtimeKit, sin importar si están registradas en PostgreSQL o no. ¿Deseas proceder?");
+      
+      if (!confirmacion) return;
+
+      const token = localStorage.getItem('token_sala');
+      if (!token) {
+        window.location.replace("login.html");
+        return;
+      }
+
+      // Bloquear botón y mostrar feedback visual
+      btnPurgaNuclear.disabled = true;
+      const originalNuclearContent = btnPurgaNuclear.innerHTML;
+      btnPurgaNuclear.innerHTML = `
+        <svg class="spinner" width="20" height="20" viewBox="0 0 50 50" style="animation: spin 1s linear infinite; margin-right: 0.5rem; display: inline-block; vertical-align: middle;">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" style="stroke-dasharray: 80, 200; stroke-dashoffset: 0;"></circle>
+        </svg>
+        Purgando servidores...
+      `;
+      showStatus("Ejecutando purga masiva de salas zombis...", "info");
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/purga_total_cloudflare`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 401) {
+          localStorage.clear();
+          window.location.replace("login.html");
+          return;
+        }
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showStatus(`✓ ${data.message}`, "success");
+          alert(`¡Purga completada! Se destruyeron ${data.salas_destruidas} salas zombis directamente en Cloudflare.`);
+          // Refrescar el monitor de forma inmediata
+          if (typeof refrescarMonitoreo === 'function') {
+            await refrescarMonitoreo();
+          }
+        } else {
+          throw new Error(data.detail || "Error en la purga");
+        }
+
+      } catch (error) {
+        console.error(error);
+        showStatus(`✗ Falló la purga: ${error.message}`, "error");
+        alert(`Error al ejecutar purga masiva: ${error.message}`);
+      } finally {
+        btnPurgaNuclear.disabled = false;
+        btnPurgaNuclear.innerHTML = originalNuclearContent;
+      }
+    });
+
+    function showStatus(msg, type) {
+      statusMsg.className = `status-msg show ${type}`;
+      statusMsg.textContent = msg;
+    }
+  </script>
+
+  <style>
+    /* CSS Spinner Styles */
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</body>
+</html>
