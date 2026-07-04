@@ -1,4 +1,4 @@
-<!-- MARCA: Correcto1 -->
+<!-- MARCA: Correcto1 --> <!-- MARCA: Correcto2 -->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -70,6 +70,9 @@
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .btn-return {
@@ -216,21 +219,73 @@
       }
     }
 
-    /* Media Query para Celulares */
-    @media (max-width: 600px) {
-      .sala-header {
-        flex-direction: column;
-        align-items: stretch;
-      }
 
-      .main-content {
-        padding: 1rem;
-      }
-
-      .placeholder-state {
-        padding: 2rem 1.5rem;
-      }
+    .control-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
+
+    .control-btn:hover:not(:disabled) {
+      background: #f7fafc;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .control-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+    }
+
+    .control-btn.active:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .control-btn.danger {
+      background: #e53e3e;
+      color: white;
+      border-color: #e53e3e;
+      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+    }
+
+    .control-btn.danger:hover:not(:disabled) {
+      background: #c53030;
+      border-color: #c53030;
+    }
+
+    /* Barra de Controles Superior */
+    .controls-bar {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+
+
 
     /* Estilos de Participantes y Controles de Audio */
     #audio-layout {
@@ -370,67 +425,238 @@
       border-color: #c6f6d5;
     }
 
-    /* Barra de Controles Superior */
-    .controls-bar {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 1.25rem 2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1.5rem;
-      width: 100%;
+
+
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.08);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
-    .control-btn {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
+    /* Botones de Sala de Espera / Error */
+    .btn-intentar-espera {
+      background: var(--primary, #3182ce);
+      color: white;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      justify-content: center;
+      width: auto;
+      cursor: pointer;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      transition: background 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-intentar-espera:hover {
+      background: var(--primary-hover, #2b6cb0);
+    }
+
+    .btn-regresar-espera {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      text-decoration: none;
+      padding: 0.6rem 1.2rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .control-btn:hover:not(:disabled) {
-      background: #f7fafc;
+    .btn-regresar-espera:hover {
+      background: #f4f6f9;
+      color: var(--text-main);
       border-color: #cbd5e0;
-      transform: translateY(-1px);
     }
 
-    .control-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    /* Estilos de la nueva sección de 3 paneles informativos */
+    .sala-paneles-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      padding: 1.5rem 2rem 0.5rem 2rem;
+      width: 100%;
     }
 
-    .control-btn.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+    .sala-panel-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.2rem;
+      box-shadow: var(--shadow-soft);
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    .control-btn.active:hover:not(:disabled) {
-      background: var(--primary-hover);
+    .peticiones-scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+      padding-right: 0.25rem;
     }
 
-    .control-btn.danger {
-      background: #e53e3e;
-      color: white;
-      border-color: #e53e3e;
-      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+    .peticion-hoy-item {
+      display: flex;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      line-height: 1.4;
     }
 
-    .control-btn.danger:hover:not(:disabled) {
-      background: #c53030;
-      border-color: #c53030;
+    .peticion-hoy-item:last-child {
+      border-bottom: none;
+    }
+
+    .peticion-hoy-text {
+      font-size: 0.72rem;
+      width: 72%;
+      flex-shrink: 0;
+      color: var(--text-main);
+      word-break: break-word;
+      text-align: left;
+    }
+
+    .peticion-hoy-user {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-style: italic;
+      white-space: nowrap;
+      width: 25%;
+      margin-right: 3%;
+      flex-shrink: 0;
+      background: #edf2f7;
+      padding: 0.15rem 0.3rem;
+      border-radius: 4px;
+      display: inline-block;
+      text-align: center;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* Media Query para Celulares */
+    @media (max-width: 600px) {
+      .sala-header {
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 1rem;
+        gap: 0.5rem;
+      }
+
+      .brand-title {
+        font-size: 1.15rem;
+        justify-content: center;
+      }
+
+      .brand-title svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .fecha-hora {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.75rem;
+        justify-content: center;
+        width: 80%;
+      }
+
+      .main-content {
+        padding: 0.7rem;
+      }
+
+      .placeholder-state {
+        padding: 2rem 1.5rem;
+      }
+
+      .controls-bar {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+      }
+
+      .control-btn {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.65rem;
+        border-radius: 8px;
+      }
+
+      #audio-layout {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 1rem 0rem;
+      }
+
+      .participant-card {
+        padding: 1rem 0.5rem;
+      }
+
+      .avatar-wrapper {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 0.5rem;
+      }
+
+      .avatar-circle {
+        font-size: 1.4rem;
+      }
+
+      .participant-name {
+        font-size: 0.6rem;
+      }
+
+      .participant-role {
+        font-size: 0.6rem;
+      }
+
+      .btn-intentar-espera,
+      .btn-regresar-espera {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        border-radius: 5px;
+      }
+
+      .sala-paneles-container {
+        grid-template-columns: 1fr;
+        padding: 0.75rem;
+        gap: 0.75rem;
+      }
+
+      .sala-panel-card {
+        height: 280px;
+        padding: 0.8rem;
+      }
+
+      .peticion-hoy-item {
+        font-size: 0.7rem;
+      }
+
+      .peticion-hoy-text {
+        font-size: 0.65rem;
+      }
+
+      .peticion-hoy-user {
+        font-size: 0.65rem;
+      }
     }
   </style>
 </head>
@@ -438,7 +664,7 @@
 <body>
 
   <header class="sala-header">
-    <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem;">
+    <div class="brand-title">
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="4" x2="12" y2="20"></line>
@@ -456,6 +682,51 @@
     <div id="salaContainer" class="sala-container active">
       <div id="contenedor-clase"
         style="width: 100%; min-height: 70vh; background-color: var(--bg-surface); display: flex; flex-direction: column; justify-content: flex-start;">
+
+        <!-- Sección de Paneles Informativos (3 partes) -->
+        <div class="sala-paneles-container">
+          <!-- Parte 1: Espacio para Imagen -->
+          <div id="panel-izquierda" class="sala-panel-card panel-imagen"
+            style="justify-content: center; align-items: center; background: #f7fafc;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+              stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              style="margin-bottom: 0.5rem;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">[Espacio para Imagen]</span>
+          </div>
+
+          <!-- Parte 2: Espacio para Imagen y/o Texto -->
+          <div id="panel-centro" class="sala-panel-card panel-info"
+            style="justify-content: center; align-items: flex-start; text-align: left; background: #f7fafc;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+              stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              style="margin-bottom: 0.5rem;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">[Espacio para Imagen y/o
+              Texto]</span>
+          </div>
+
+          <!-- Parte 3: Peticiones de Hoy -->
+          <div class="sala-panel-card panel-peticiones">
+            <h4
+              style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 0.4rem; margin-bottom: 0.4rem;">
+              Peticiones para hoy</h4>
+            <div id="sala-peticiones-hoy" class="peticiones-scroll-container">
+              <div
+                style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.75rem; font-style: italic;">
+                Cargando peticiones...
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Barra de Controles -->
         <div class="controls-bar">
@@ -493,22 +764,6 @@
   </main>
 
   <script type="module">
-    // Desregistrar de forma agresiva cualquier service worker y limpiar caché en desarrollo
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function (registrations) {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
-    if ('caches' in window) {
-      caches.keys().then(function (names) {
-        for (let name of names) {
-          caches.delete(name);
-        }
-      });
-    }
-
     // Configuración dinámica de API_BASE_URL
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://127.0.0.1:8000/api'
@@ -516,6 +771,136 @@
 
     // Referencia global al meeting activo para la desconexión segura
     let activeMeeting = null;
+    let activeMeetingId = null;
+
+    async function cargarPeticionesHoySala(token) {
+      const container = document.getElementById('sala-peticiones-hoy');
+      if (!container) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/peticiones/hoy`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener peticiones de hoy.');
+        }
+
+        const peticiones = await response.json();
+        if (peticiones.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.75rem; font-style: italic;">
+              Aún no hay peticiones hoy
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = peticiones.map((p) => {
+          const rawUser = p.usuario || 'Anónimo';
+          const truncatedUser = rawUser.length > 9
+            ? rawUser.substring(0, 9) + '...'
+            : rawUser;
+
+          const rawPetition = p.peticion || '';
+          const truncatedPetition = rawPetition.length > 100
+            ? rawPetition.substring(0, 100) + '...'
+            : rawPetition;
+
+          return `
+            <div class="peticion-hoy-item">
+              <span class="peticion-hoy-user" title="${escapeHTML(rawUser)}">${escapeHTML(truncatedUser)}</span>
+              <span class="peticion-hoy-text" title="${escapeHTML(rawPetition)}">${escapeHTML(truncatedPetition)}</span>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error("Error cargando peticiones de hoy en sala:", err);
+        container.innerHTML = `
+          <div style="text-align: center; padding: 1.5rem; color: var(--danger); font-size: 0.7rem;">
+            Error al cargar las peticiones.
+          </div>
+        `;
+      }
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    let defaultLeftHtml = "";
+    let defaultCenterHtml = "";
+    let currentLeftResourceId = null;
+    let currentCenterResourceId = null;
+
+    async function actualizarTableroActivo() {
+      const panelIzquierda = document.getElementById('panel-izquierda');
+      const panelCentro = document.getElementById('panel-centro');
+      if (!panelIzquierda || !panelCentro) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/tablero/activos`);
+        if (!response.ok) throw new Error('Error al obtener activos del tablero.');
+
+        const data = await response.json();
+
+        // 1. Panel Izquierdo
+        if (data.izquierda) {
+          if (currentLeftResourceId !== data.izquierda.id) {
+            currentLeftResourceId = data.izquierda.id;
+            panelIzquierda.style.justifyContent = 'center';
+            panelIzquierda.style.alignItems = 'center';
+            panelIzquierda.style.background = 'var(--bg-surface)';
+            panelIzquierda.innerHTML = `<img src="${data.izquierda.contenido}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;" />`;
+          }
+        } else {
+          if (currentLeftResourceId !== null) {
+            currentLeftResourceId = null;
+            panelIzquierda.style.justifyContent = 'center';
+            panelIzquierda.style.alignItems = 'center';
+            panelIzquierda.style.background = '#f7fafc';
+            panelIzquierda.innerHTML = defaultLeftHtml;
+          }
+        }
+
+        // 2. Panel Centro
+        if (data.centro) {
+          if (currentCenterResourceId !== data.centro.id) {
+            currentCenterResourceId = data.centro.id;
+            panelCentro.style.justifyContent = 'center';
+            panelCentro.style.alignItems = 'center';
+            panelCentro.style.background = 'var(--bg-surface)';
+            if (data.centro.tipo === 'imagen') {
+              panelCentro.innerHTML = `<img src="${data.centro.contenido}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;" />`;
+            } else {
+              panelCentro.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: flex-start; padding: 1rem; font-size: 1rem; color: var(--text-main); font-weight: 500; text-align: left; overflow-y: auto; line-height: 1.5; white-space: pre-wrap;">${escapeHTML(data.centro.contenido)}</div>`;
+            }
+          }
+        } else {
+          if (currentCenterResourceId !== null) {
+            currentCenterResourceId = null;
+            panelCentro.style.justifyContent = 'center';
+            panelCentro.style.alignItems = 'center';
+            panelCentro.style.background = '#f7fafc';
+            panelCentro.innerHTML = defaultCenterHtml;
+          }
+        }
+
+      } catch (err) {
+        console.error("Error al actualizar tablero activo:", err);
+      }
+    }
 
     const showError = (message) => {
       const contenedor = document.getElementById('contenedor-clase');
@@ -525,7 +910,30 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
             <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-main);">Error al iniciar la videoconferencia</h3>
             <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 400px; margin-bottom: 1.5rem; line-height: 1.5;">${message}</p>
-            <a href="principal.html" class="btn-return" style="border-color: var(--border-color); color: var(--text-muted); display: inline-flex; justify-content: center; width: auto; text-decoration: none;">Regresar al inicio</a>
+            <a href="principal.html" class="btn-regresar-espera">Regresar al inicio</a>
+          </div>
+        `;
+      }
+    };
+
+    const showWaitingRoom = (message) => {
+      const contenedor = document.getElementById('contenedor-clase');
+      if (contenedor) {
+        contenedor.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2rem; text-align: center; color: var(--text-main);">
+            <div style="margin-bottom: 1.5rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffb703" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: pulse 2s infinite ease-in-out;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-main);">En espera ...</h3>
+            <p style="color: var(--text-muted); font-size: 1rem; max-width: 450px; margin-bottom: 2rem; line-height: 1.6;">${message}</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <button onclick="window.location.reload()" class="btn-intentar-espera">
+                Volver a intentar
+              </button>
+              <a href="principal.html" class="btn-regresar-espera">
+                Regresar al inicio
+              </a>
+            </div>
           </div>
         `;
       }
@@ -541,7 +949,7 @@
       horas = horas % 12;
       horas = horas ? horas : 12;
       const minutos = String(ahora.getMinutes()).padStart(2, '0');
-      
+
       const texto = `${dia} de ${mes} ${horas}:${minutos} ${ampm}`;
       const el = document.getElementById('fecha-hora-texto');
       if (el) {
@@ -556,7 +964,30 @@
     document.addEventListener('DOMContentLoaded', async () => {
       // Iniciar reloj
       actualizarFechaHora();
+
+      // Capturar contenido original de los marcadores del tablero
+      const pIzq = document.getElementById('panel-izquierda');
+      const pCen = document.getElementById('panel-centro');
+      if (pIzq) defaultLeftHtml = pIzq.innerHTML;
+      if (pCen) defaultCenterHtml = pCen.innerHTML;
       setInterval(actualizarFechaHora, 30000);
+
+      // Capturar el ID de la clase con URLSearchParams
+      const urlParams = new URLSearchParams(window.location.search);
+      const claseId = urlParams.get('clase');
+
+      // Limpieza de residuos de localStorage o sessionStorage ante cambios de clase
+      if (claseId) {
+        const activeClaseKey = 'active_clase_id';
+        const oldClaseId = localStorage.getItem(activeClaseKey);
+
+        if (oldClaseId && oldClaseId !== claseId) {
+          console.log(`[Seguridad] Cambio de clase detectado (De ${oldClaseId} a ${claseId}). Limpiando residuos...`);
+          localStorage.removeItem('meeting_auth_token');
+          sessionStorage.clear();
+        }
+        localStorage.setItem(activeClaseKey, claseId);
+      }
 
       const token = localStorage.getItem('token_sala');
 
@@ -588,17 +1019,31 @@
         const username = userData.nombre_real || localStorage.getItem('nombre_real') || userData.usuario || 'Usuario';
         const userId = userData.id_usuario ? String(userData.id_usuario) : (userData.usuario || username);
 
+        if (userData.rol) {
+          localStorage.setItem('rol_usuario', userData.rol);
+        }
+
         // Si la seguridad da luz verde, revelamos la interfaz al usuario
         document.body.classList.add('ready');
 
-        // Inicializar la sala de Dyte
-        await inicializarClaseDyte(token, username, userId);
+        // Cargar peticiones de hoy en la sala
+        cargarPeticionesHoySala(token);
+
+        // Inicializar y comenzar el ciclo de actualización del tablero
+        actualizarTableroActivo();
+        setInterval(actualizarTableroActivo, 3000);
+
+        // Inicializar la sala de Dyte aaa
+        //await inicializarClaseDyte(token, username, userId, claseId);
 
       } catch (error) {
         console.error('Violación de acceso interceptada o error de carga:', error.message);
         if (error.message.includes('Sesión expirada') || error.message.includes('token inválido')) {
           localStorage.removeItem('token_sala');
           window.location.replace('login.html');
+        } else if (error.message.includes('no ha sido iniciada') || error.message.includes('disponible') || error.message.includes('disponivle')) {
+          document.body.classList.add('ready');
+          showWaitingRoom(error.message);
         } else {
           document.body.classList.add('ready');
           showError(error.message);
@@ -609,13 +1054,14 @@
     /**
      * Inicializa el SDK de Dyte y el componente web de la reunión de forma segura
      */
-    async function inicializarClaseDyte(token, username, userId) {
-      // Determinar preset/rol según el nombre de usuario
+    async function inicializarClaseDyte(token, username, userId, claseId) {
+      // Determinar preset/rol según el rol del usuario en la plataforma
+      const userRoleFromStorage = localStorage.getItem('rol_usuario') || 'usuario';
       let presetName = 'group_call_participant';
-      let userRole = 'Estudiante';
-      if (username.toLowerCase().includes('profesor') || username.toLowerCase().includes('docente') || username.toLowerCase().includes('admin')) {
+      let userRole = 'Usuario';
+      if (userRoleFromStorage === 'admin' || userRoleFromStorage === 'moderador') {
         presetName = 'group_call_host';
-        userRole = 'Docente';
+        userRole = userRoleFromStorage === 'admin' ? 'Administrador' : 'Moderador';
       }
 
       try {
@@ -629,16 +1075,18 @@
             client_specific_id: userId,
             name: username,
             preset_name: presetName,
-            title: "Clase Virtual"
+            title: "Sala Virtual",
+            clase_id: claseId ? parseInt(claseId) : null
           })
         });
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.detail || 'Error en el backend al crear la sala.');
+          throw new Error(errData.message || errData.detail || 'Error en el backend al crear la sala.');
         }
 
         const data = await response.json();
+        activeMeetingId = data.meeting_id;
 
         if (!data.authToken) {
           throw new Error('El servidor no retornó un token de acceso a la sala válido.');
@@ -681,7 +1129,7 @@
               if (estado.activa === 0) {
                 clearInterval(checkEstadoInterval);
                 console.log("⚠️ La sala ha sido finalizada por el administrador. Auto-expulsando...");
-                
+
                 if (activeMeeting) {
                   try {
                     await activeMeeting.leave();
@@ -689,12 +1137,12 @@
                     console.error("Error al salir de la sala:", leaveErr);
                   }
                 }
-                
+
                 const salaContainer = document.getElementById('salaContainer');
                 if (salaContainer) {
                   salaContainer.innerHTML = '';
                 }
-                
+
                 alert("La sesión ha sido finalizada por el administrador");
                 window.location.href = 'principal.html';
               }
@@ -805,10 +1253,15 @@
           card.id = id;
           card.className = 'participant-card';
 
-          const validName = nombre || 'Usuario';
-          const initials = validName.charAt(0).toUpperCase();
+          const rawName = nombre || 'Usuario';
+          const validName = rawName.length > 13
+            ? rawName.substring(0, 13) + '...'
+            : rawName;
+          const initials = rawName.charAt(0).toUpperCase();
           const micClass = audioEnabled ? 'active' : 'muted';
           const micIconSvg = audioEnabled ? '🎤' : '🔇';
+
+          const escapeAttribute = (str) => (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
           card.innerHTML = `
             <div class="mic-badge ${micClass}" id="mic-badge-${id}">
@@ -820,8 +1273,7 @@
               </div>
             </div>
             <div class="participant-info">
-              <div class="participant-name">${validName}</div>
-              <div class="participant-role">${sufijo || 'Participante'}</div>
+              <div class="participant-name" title="${escapeAttribute(rawName)}">${escapeAttribute(validName)}</div>
             </div>
           `;
           container.appendChild(card);
@@ -874,13 +1326,13 @@
         if (meeting.participants && meeting.participants.joined) {
           const participantesPrevios = meeting.participants.joined.toArray();
           participantesPrevios.forEach(p => {
-            let role = p.name && (p.name.toLowerCase().includes('profesor') || p.name.toLowerCase().includes('docente')) ? 'Docente' : 'presente';
+            let role = p.name && (p.name.toLowerCase().includes('admin') || p.name.toLowerCase().includes('moderador') || p.name.toLowerCase().includes('profesor')) ? 'Moderador' : 'Usuario';
             dibujarCirculo(p.id, p.name, role, p.audioEnabled);
           });
 
           // Eventos para participantes nuevos
           meeting.participants.joined.on('participantJoined', (participant) => {
-            let role = participant.name && (participant.name.toLowerCase().includes('profesor') || participant.name.toLowerCase().includes('docente')) ? 'Docente' : 'presente';
+            let role = participant.name && (participant.name.toLowerCase().includes('admin') || participant.name.toLowerCase().includes('moderador') || participant.name.toLowerCase().includes('profesor')) ? 'Moderador' : 'Usuario';
             dibujarCirculo(participant.id, participant.name, role, participant.audioEnabled);
           });
 
@@ -910,7 +1362,11 @@
 
       } catch (error) {
         console.error('Error durante la inicialización de RealtimeKit:', error);
-        showError(error.message);
+        if (error.message.includes('no ha sido iniciada') || error.message.includes('disponible') || error.message.includes('disponivle')) {
+          showWaitingRoom(error.message);
+        } else {
+          showError(error.message);
+        }
       }
     }
 
@@ -919,14 +1375,35 @@
       e.preventDefault();
       const targetUrl = e.currentTarget.href || 'principal.html';
 
+      const exitButtons = document.querySelectorAll('.btn-leave-sala, .btn-return');
+      exitButtons.forEach(btn => {
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.7';
+      });
+
+      // Si el usuario actual es admin o moderador, cerrar la sala en el backend para todos
+      const userRole = localStorage.getItem('rol_usuario');
+      if (userRole === 'admin' || userRole === 'moderador') {
+        console.log("Cerrando la sala porque sale un admin/moderador...");
+        try {
+          const token = localStorage.getItem('token_sala');
+          const url = activeMeetingId
+            ? `${API_BASE_URL}/sala/forzar_cierre?meeting_id=${activeMeetingId}`
+            : `${API_BASE_URL}/sala/forzar_cierre`;
+          await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        } catch (closeErr) {
+          console.error("Error al forzar el cierre de la sala en el backend:", closeErr);
+        }
+      }
+
       if (activeMeeting) {
         try {
-          const exitButtons = document.querySelectorAll('.btn-leave-sala, .btn-return');
-          exitButtons.forEach(btn => {
-            btn.style.pointerEvents = 'none';
-            btn.style.opacity = '0.7';
-          });
-
           await activeMeeting.leave();
         } catch (err) {
           console.error("Error al salir de la sala:", err);
@@ -945,6 +1422,22 @@
     window.addEventListener('pagehide', () => {
       if (activeMeeting) {
         activeMeeting.leave().catch(err => console.error("Error de desconexión en pagehide:", err));
+      }
+
+      const userRole = localStorage.getItem('rol_usuario');
+      if (userRole === 'admin' || userRole === 'moderador') {
+        const token = localStorage.getItem('token_sala');
+        const url = activeMeetingId
+          ? `${API_BASE_URL}/sala/forzar_cierre?meeting_id=${activeMeetingId}`
+          : `${API_BASE_URL}/sala/forzar_cierre`;
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          keepalive: true
+        }).catch(err => console.error("Error al forzar cierre en pagehide:", err));
       }
     });
   </script>

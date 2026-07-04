@@ -177,6 +177,9 @@
       padding: 1.3rem;
       box-shadow: var(--shadow-soft);
       transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      height: 580px;
+      display: flex;
+      flex-direction: column;
     }
 
     .aviso-card:hover {
@@ -194,7 +197,7 @@
     }
 
     .aviso-titulo {
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 600;
       margin-bottom: 0.75rem;
       color: var(--text-main);
@@ -207,6 +210,11 @@
     }
 
     /* Formulario de Petición en Tarjeta */
+    .peticion-form-container {
+      padding: 1rem 0rem 0rem 0rem;
+      width: 100%;
+    }
+
     .peticion-label {
       display: block;
       font-size: 0.8rem;
@@ -221,7 +229,7 @@
     .peticion-textarea {
       width: 100%;
       height: 85px;
-      padding: 0.75rem;
+      padding: 0.4rem 0.6rem;
       border-radius: 8px;
       border: 1px solid var(--border-color);
       font-family: inherit;
@@ -246,7 +254,7 @@
       border: none;
       padding: 0.75rem;
       border-radius: 8px;
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -273,6 +281,84 @@
       opacity: 0.7;
     }
 
+    /* Estilos para el listado de peticiones de hoy */
+    .peticion-hoy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .peticion-hoy-item:last-child {
+      border-bottom: none;
+    }
+
+    .peticion-hoy-number {
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 1.5rem;
+    }
+
+    .peticion-hoy-text {
+      font-size: 0.6rem;
+      width: 72%;
+      flex-shrink: 0;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    .peticion-hoy-user {
+      font-size: 0.5rem;
+      color: var(--text-muted);
+      font-style: italic;
+      white-space: nowrap;
+      width: 25%;
+      margin-right: 0%;
+      flex-shrink: 0;
+      background: #edf2f7;
+      padding: 0.15rem 0.2rem;
+      border-radius: 4px;
+      display: inline-block;
+      text-align: center;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* Estilos para el estado de petición enviada */
+    .contenedor-peticion-enviada {
+      background-color: #f0fff4;
+      border: 1px solid #c6f6d5;
+      border-radius: 8px;
+      padding: 0.7rem;
+      color: #276749;
+      font-size: 0.64rem;
+      line-height: 1.4;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(56, 161, 105, 0.05);
+    }
+
+    .titulo-peticion-enviada {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.64rem;
+      font-weight: 700;
+    }
+
+    .texto-peticion-enviada {
+      font-style: italic;
+      color: #2f855a;
+      display: block;
+      border-left: 2px solid #38a169;
+      padding-left: 8px;
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      word-break: break-word;
+    }
+
     @media (max-width: 600px) {
       .navbar {
         flex-direction: column;
@@ -282,12 +368,79 @@
 
       .dashboard-header {
         flex-direction: column;
-        align-items: flex-start;
+
       }
 
       .btn-action-primary {
         width: 100%;
         justify-content: center;
+        font-size: 0.88rem;
+        padding: 0.75rem 1.5rem;
+      }
+
+      .btn-logout {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      .username-display {
+        font-size: 0.7rem;
+      }
+
+      .aviso-titulo {
+        font-size: 1rem;
+      }
+
+      .main-container {
+        padding: 0.8rem;
+        font-size: 0.85rem;
+      }
+
+      .btn-peticion-enviar {
+        font-size: 0.75rem;
+        padding: 0.6rem;
+      }
+
+      .aviso-card {
+        padding: 1rem;
+      }
+
+      .peticion-textarea {
+        font-size: 0.75rem;
+        height: 70px;
+        padding: 0.5rem;
+      }
+
+      .peticion-form-container {
+        width: 100%;
+      }
+
+      .peticion-hoy-item {
+        font-size: 0.75rem;
+        padding: 0.4rem 0;
+      }
+
+      .peticion-hoy-user {
+        font-size: 0.5rem;
+        padding: 0.1rem 0.3rem;
+      }
+
+      .contenedor-peticion-enviada {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+        margin-top: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .titulo-peticion-enviada {
+        font-size: 0.82rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .texto-peticion-enviada {
+        font-size: 0.75rem;
+        padding-left: 6px;
+        margin-top: 0.2rem;
       }
     }
   </style>
@@ -327,6 +480,20 @@
 
     <!-- Feed de Avisos -->
     <section class="avisos-grid">
+
+
+      <!-- Aviso 2 -->
+      <article class="aviso-card">
+        <h3 class="aviso-titulo">Peticiones para hoy</h3>
+        <div id="peticiones-hoy-container"
+          style="flex: 1; overflow-y: auto; margin-top: 0.5rem; padding-right: 0.25rem;">
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+            Cargando peticiones...
+          </div>
+        </div>
+      </article>
+
+
       <!-- Aviso 1 -->
       <article class="aviso-card">
         <!-- Usamos la pregunta del texto como el título de la tarjeta (sin comillas) -->
@@ -353,25 +520,18 @@
 
       </article>
 
-      <!-- Aviso 2 -->
-      <article class="aviso-card">
-        <h3 class="aviso-titulo">Entrega de Proyectos Finales</h3>
-        <p class="aviso-cuerpo">Las fechas para las entregas de proyectos han sido actualizadas en el calendario
-          académico. Se requiere subirlos en formato PDF.</p>
-      </article>
 
       <!-- Aviso 3 -->
       <article class="aviso-card">
-        <h3 class="aviso-titulo">Peticiones</h3>
+        <h3 class="aviso-titulo">Agrega tu petición</h3>
         <p class="aviso-cuerpo">Puedes incluir aquí tu petición para ser mencionada en el Rezo del Rosario.</p>
 
         <!-- Contenedor del Estado de la Petición -->
         <div id="contenedor-estado-peticion" style="display: none;"></div>
 
         <!-- Contenedor del Formulario de Petición -->
-        <div id="contenedor-formulario-peticion">
+        <div id="contenedor-formulario-peticion" class="peticion-form-container">
           <!-- Marcador para funcion -->
-          <label for="peticionInput" class="peticion-label">✝ Agrega tu petición</label>
           <textarea id="peticionInput" class="peticion-textarea" maxlength="150"
             placeholder="Escribe tu petición aquí..."></textarea>
           <div
@@ -402,6 +562,16 @@
      * Seguridad de Ruta: Validación Blindada
      */
     document.addEventListener('DOMContentLoaded', async () => {
+      // Capturar clase de la URL o localStorage, y propagarla al enlace del botón
+      const urlParams = new URLSearchParams(window.location.search);
+      const claseId = urlParams.get('clase') || localStorage.getItem('active_clase_id') || '1';
+      localStorage.setItem('active_clase_id', claseId);
+
+      const btnIrASala = document.querySelector('.btn-action-primary');
+      if (btnIrASala) {
+        btnIrASala.href = `sala.html?clase=${claseId}`;
+      }
+
       const token = localStorage.getItem('token_sala');
 
       // 1. Si no hay token, al login
@@ -445,8 +615,9 @@
         // 3. Todo bien, mostramos la interfaz Glassmorphic
         document.body.classList.add('ready');
 
-        // Verificar si ya envió una petición hoy
+        // Verificar si ya envió una petición hoy y refrescar listado
         await verificarEstadoPeticionHoy(token);
+        await refrescarPeticionesHoy(token);
 
       } catch (error) {
         console.error('Protección de ruta activa:', error.message);
@@ -458,7 +629,25 @@
     // Lógica de Logout
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
-      btnLogout.addEventListener('click', () => {
+      btnLogout.addEventListener('click', async () => {
+        const userRole = localStorage.getItem('rol_usuario');
+        const token = localStorage.getItem('token_sala');
+
+        if (token && (userRole === 'admin' || userRole === 'moderador')) {
+          console.log("Cerrando la sala activa debido a cierre de sesión de admin/moderador...");
+          try {
+            await fetch(`${API_BASE_URL}/sala/forzar_cierre`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+          } catch (err) {
+            console.error("Error al forzar cierre de sala en logout:", err);
+          }
+        }
+
         localStorage.clear();
         window.location.replace("login.html");
       });
@@ -528,6 +717,9 @@
           peticionInput.value = '';
           charCounter.textContent = '150 caracteres restantes';
 
+          // Refrescar listado general
+          refrescarPeticionesHoy(token);
+
           // Ocultar formulario e inmediatamente pintar en su lugar el texto de la petición
           const formContainer = document.getElementById('contenedor-formulario-peticion');
           const statusContainer = document.getElementById('contenedor-estado-peticion');
@@ -535,10 +727,10 @@
             formContainer.style.display = 'none';
             statusContainer.style.display = 'block';
             statusContainer.innerHTML = `
-              <div style="background-color: #f0fff4; border: 1px solid #c6f6d5; border-radius: 8px; padding: 1rem; color: #276749; font-size: 0.85rem; line-height: 1.4; margin-top: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(56, 161, 105, 0.05);">
-                <strong style="display: block; margin-bottom: 0.4rem; font-size: 0.9rem;">✓ Ya enviaste tu petición de hoy:</strong>
-                <span style="font-style: italic; color: #2f855a; display: block; border-left: 2px solid #38a169; padding-left: 8px; margin-top: 0.25rem; font-size: 0.8rem; word-break: break-word;">
-                  "${texto}"
+              <div class="contenedor-peticion-enviada">
+                <strong class="titulo-peticion-enviada">✓ Ya enviaste tu petición de hoy:</strong>
+                <span class="texto-peticion-enviada">
+                  "${escapeHTML(texto)}"
                 </span>
               </div>
             `;
@@ -590,10 +782,10 @@
           formContainer.style.display = 'none';
           statusContainer.style.display = 'block';
           statusContainer.innerHTML = `
-            <div style="background-color: #f0fff4; border: 1px solid #c6f6d5; border-radius: 8px; padding: 1rem; color: #276749; font-size: 0.85rem; line-height: 1.4; margin-top: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(56, 161, 105, 0.05);">
-              <strong style="display: block; margin-bottom: 0.4rem; font-size: 0.9rem;">✓ Ya enviaste tu petición de hoy:</strong>
-              <span style="font-style: italic; color: #2f855a; display: block; border-left: 2px solid #38a169; padding-left: 8px; margin-top: 0.25rem; font-size: 0.8rem; word-break: break-word;">
-                "${data.peticion}"
+            <div class="contenedor-peticion-enviada">
+              <strong class="titulo-peticion-enviada">✓ Ya enviaste tu petición de hoy:</strong>
+              <span class="texto-peticion-enviada">
+                "${escapeHTML(data.peticion)}"
               </span>
             </div>
           `;
@@ -608,6 +800,74 @@
         formContainer.style.display = 'block';
         statusContainer.style.display = 'none';
       }
+    }
+
+    async function refrescarPeticionesHoy(token) {
+      const container = document.getElementById('peticiones-hoy-container');
+      if (!container) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/peticiones/hoy`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener peticiones de hoy.');
+        }
+
+        const peticiones = await response.json();
+        if (peticiones.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem; font-style: italic;">
+              Aún no hay peticiones hoy
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = peticiones.map((p, index) => {
+          // Truncar nombre de usuario a 9 caracteres con puntos suspensivos
+          const rawUser = p.usuario || 'Anónimo';
+          const truncatedUser = rawUser.length > 9
+            ? rawUser.substring(0, 9) + '...'
+            : rawUser;
+
+          // Truncar petición a un máximo de 100 caracteres con puntos suspensivos
+          const rawPetition = p.peticion || '';
+          const truncatedPetition = rawPetition.length > 100
+            ? rawPetition.substring(0, 100) + '...'
+            : rawPetition;
+
+          return `
+            <div class="peticion-hoy-item">
+              <span class="peticion-hoy-user" title="${escapeHTML(rawUser)}">${escapeHTML(truncatedUser)}</span>
+              <span class="peticion-hoy-text" title="${escapeHTML(rawPetition)}">${escapeHTML(truncatedPetition)}</span>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error("Error cargando peticiones de hoy:", err);
+        container.innerHTML = `
+          <div style="text-align: center; padding: 1.5rem; color: var(--danger); font-size: 0.75rem;">
+            Error al cargar las peticiones.
+          </div>
+        `;
+      }
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
   </script>
 

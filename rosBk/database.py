@@ -1,3 +1,4 @@
+from enum import Enum
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime, timezone
@@ -15,6 +16,11 @@ Base = declarative_base()
 # Configurar el generador de sesiones para la conexión a la base de datos
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+class Rol(str, Enum):
+    admin = "admin"
+    moderador = "moderador"
+    usuario = "usuario"
+
 # Definir el modelo ORM UsuarioModel mapeado a la tabla "usuarios"
 class UsuarioModel(Base):
     __tablename__ = "usuarios"
@@ -30,6 +36,9 @@ class UsuarioModel(Base):
     
     # Nombre real del usuario
     nombre_real = Column(String, nullable=True)
+    
+    # Rol del usuario para RBAC
+    rol = Column(String(10), default=Rol.usuario.value, nullable=False)
 
 # Definir el modelo ORM PeticionModel mapeado a la tabla "peticiones"
 class PeticionModel(Base):
@@ -53,6 +62,18 @@ class SalaModel(Base):
     duracion = Column(Integer, nullable=True)
     numero_participants = Column(Integer, default=0, nullable=True)
     activa = Column(Integer, default=1, nullable=False)
+
+class TableroModel(Base):
+    __tablename__ = "tablero"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    ubicacion = Column(String(15), nullable=False)
+    tipo = Column(String(10), nullable=False)
+    contenido = Column(String, nullable=False)
+    fechaCarga = Column(DateTime, default=datetime.utcnow, nullable=False)
+    usuarioCarga = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
+    valido = Column(Integer, default=1, nullable=False)
+    activoActual = Column(Integer, default=0, nullable=False)
 
 def get_db():
     """

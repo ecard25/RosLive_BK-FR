@@ -545,6 +545,13 @@
           throw new Error('No autorizado');
         }
 
+        const data = await response.json();
+        if (data.rol !== 'admin') {
+          alert('Acceso denegado: Se requiere rol de administrador.');
+          window.location.replace("principal.html");
+          return;
+        }
+
         // Si la sesión es válida, hacer visible la interfaz
         document.body.classList.add('ready');
         

@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from database import get_db, UsuarioModel
+from database import get_db, UsuarioModel, Rol
 
 # Configuración global para la generación y firma de JSON Web Tokens (JWT)
 SECRET_KEY = "TU_SECRET_KEY_SUPER_SEGURA_AQUI"  # Cambiar por una clave segura en producción
@@ -74,4 +74,19 @@ def obtener_usuario_actual(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
         
     return usuario_db
+
+class AccesoDenegadoException(Exception):
+    def __init__(self, message: str = "Acceso denegado: Se requiere rol superior"):
+        self.message = message
+
+def exigir_roles(*roles_permitidos: str):
+    """
+    Dependencia parametrizada para exigir roles específicos.
+    Si el usuario actual no posee uno de los roles permitidos, lanza AccesoDenegadoException.
+    """
+    def dependencia(usuario_actual: UsuarioModel = Depends(obtener_usuario_actual)):
+        if usuario_actual.rol not in roles_permitidos:
+            raise AccesoDenegadoException("Acceso denegado: Se requiere rol superior")
+        return usuario_actual
+    return dependencia
     

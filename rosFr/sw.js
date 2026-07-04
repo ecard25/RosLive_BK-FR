@@ -1,10 +1,11 @@
-const CACHE_NAME = 'sala-virtual-v2';
+const CACHE_NAME = 'sala-virtual-v17';
 // Recursos estáticos que se guardarán en caché durante la instalación
 const urlsToCache = [
   '/',
   '/principal.html',
   '/login.html',
   '/sala.html',
+  '/admincontrol.html',
   '/manifest.json',
   '/sw.js'
 ];
@@ -20,6 +21,7 @@ self.addEventListener('install', event => {
         console.log('[Service Worker] Precaching recursos de la App');
         return cache.addAll(urlsToCache);
       })
+      .then(() => self.skipWaiting()) // Fuerza al nuevo SW a activarse sin esperar
   );
 });
 
@@ -70,6 +72,6 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Toma el control de las pestañas de inmediato
   );
 });

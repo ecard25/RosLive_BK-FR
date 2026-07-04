@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Tablero - El Rosario en vivo</title>
+  <!-- Google Fonts: Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Cloudflare RealtimeKit Web Components CDNs -->
+  <script src="https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit@latest/dist/browser.js"></script>
+  <script type="module">
+    import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@latest/loader/index.es2017.js';
+    defineCustomElements();
+  </script>
+
+  <style>
+    :root {
+      --primary: #3182ce;
+      --primary-hover: #2b6cb0;
+      --bg-main: #f7fafc;
+      --bg-surface: #ffffff;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --border-color: #e2e8f0;
+      --success: #38a169;
+      --danger: #e53e3e;
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    body.ready {
+      opacity: 1;
+    }
+
+    /* Header */
+    .admin-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-return {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-return:hover {
+      background: #f7fafc;
+      color: var(--text-main);
+      border-color: #cbd5e0;
+    }
+
+    /* Main Container */
+    .admin-container {
+      flex: 1;
+      width: 100%;
+      max-width: 1300px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .panel-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    /* Columns layout */
+    .admin-columns-container {
+      display: grid;
+      grid-template-columns: 35fr 35fr 30fr;
+      gap: 1.75rem;
+      width: 100%;
+    }
+
+    .admin-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .column-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    @media (max-width: 950px) {
+      .admin-columns-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    /* Estilos Premium para la Lista de Usuarios (Moderador) */
+    .panel-usuarios {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 400px;
+    }
+
+    .usuarios-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .total-usuarios-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-mute-all {
+      background-color: #feb2b2;
+      color: #9b2c2c;
+      border: 1px solid #fc8181;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-mute-all:hover {
+      background-color: #fc8181;
+      color: white;
+    }
+
+    .usuarios-list-container {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-right: 0.25rem;
+      max-height: 600px;
+    }
+
+    .usuario-list-item {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 0.8rem;
+      border-radius: 10px;
+      background-color: #f7fafc;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .usuario-list-item.speaking {
+      border-color: #38a169;
+      background-color: #f0fff4;
+      box-shadow: 0 0 8px rgba(56, 161, 105, 0.15);
+    }
+
+    .usuario-list-item.speaking .usuario-name {
+      color: #276749;
+      font-weight: 600;
+    }
+
+    .usuario-actions {
+      display: flex;
+      gap: 0.35rem;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .btn-user-action {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+      padding: 0;
+    }
+
+    .btn-user-action.btn-mute-user {
+      color: var(--text-muted);
+    }
+
+    .btn-user-action.btn-mute-user:hover {
+      background-color: #edf2f7;
+      color: var(--text-main);
+    }
+
+    .btn-user-action.btn-mute-user.muted {
+      color: #e53e3e;
+      background-color: #fff5f5;
+      border-color: #feb2b2;
+    }
+
+    .btn-user-action.btn-kick-user {
+      color: #e53e3e;
+      border-color: #feb2b2;
+    }
+
+    .btn-user-action.btn-kick-user:hover {
+      background-color: #e53e3e;
+      color: white;
+      border-color: #e53e3e;
+    }
+
+    .usuario-name {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      text-align: left;
+    }
+
+    .usuario-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #cbd5e0;
+      margin-left: 0.5rem;
+      flex-shrink: 0;
+      transition: background-color 0.2s ease;
+    }
+
+    .usuario-status-dot.active {
+      background-color: #48bb78;
+    }
+
+    .usuario-status-dot.speaking {
+      background-color: #38a169;
+      animation: dot-pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes dot-pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 0.6;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Card Panels */
+    .control-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card-subtitle {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Form Styles */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      border: 2px dashed var(--border-color);
+      border-radius: 10px;
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+      background: #fcfdfd;
+    }
+
+    .file-input-wrapper:hover {
+      border-color: var(--primary);
+    }
+
+    .file-input-real {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-input-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .text-area {
+      font-family: inherit;
+      width: 100%;
+      height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      resize: none;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .text-area:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .gallery-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s ease;
+      position: relative;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .gallery-item.active {
+      border-color: var(--success);
+      box-shadow: 0 4px 15px rgba(56, 161, 105, 0.15);
+    }
+
+    .active-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--success);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 50px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-preview {
+      height: 100px;
+      background: #f7fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .gallery-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .gallery-text-preview {
+      padding: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-main);
+      overflow-y: auto;
+      height: 100%;
+      line-height: 1.3;
+      white-space: pre-wrap;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-info {
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: auto;
+    }
+
+    .btn-action-group {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .btn-activate {
+      flex: 1;
+      background: #edf2f7;
+      color: var(--text-main);
+      border: none;
+      padding: 0.35rem;
+      border-radius: 6px;
+      font-size: 0.55rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-activate:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .gallery-item.active .btn-activate {
+      background: var(--success);
+      color: white;
+      cursor: default;
+    }
+
+    .btn-delete {
+      background: #fff5f5;
+      color: var(--danger);
+      border: 1px solid #fed7d7;
+      padding: 0.35rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-delete:hover {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Encabezado de la página -->
+  <header class="admin-header">
+    <div class="brand-title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="4" x2="12" y2="20"></line>
+        <line x1="7" y1="9" x2="17" y2="9"></line>
+      </svg>
+      El Rosario en vivo - Administración
+    </div>
+    <a href="principal.html" class="btn-return">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="6" y2="20"></line>
+        <polyline points="14 4 6 12 14 20"></polyline>
+      </svg>
+      Volver al Inicio
+    </a>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main class="admin-container">
+    <h1 class="panel-title">Control de Tablero</h1>
+
+    <!-- Contenedor de Columnas en Paralelo -->
+    <div class="admin-columns-container">
+
+      <!-- Columna Izquierda: Card Izquierda (Imágenes) -->
+      <div class="admin-column">
+        <h2 class="column-title">Card Izquierda</h2>
+
+        <!-- Galería -->
+        <div class="control-card">
+          <h3 class="card-subtitle">Galería de Card Izq</h3>
+          <div id="gallery-izq" class="gallery-grid">
+            <!-- Carga Dinámica -->
+          </div>
+        </div>
+
+        <!-- Formulario Carga -->
+        <div class="control-card">
+          <h3 class="card-subtitle">Subir Imagen</h3>
+          <form id="form-upload-izq" onsubmit="handleImageUpload(event, 'izquierda')">
+            <div class="form-group">
+              <span class="form-label">Seleccionar archivo de imagen</span>
+              <div class="file-input-wrapper">
+                <input type="file" id="file-izq" class="file-input-real" accept="image/*" required
+                  onchange="updateFileLabel('file-izq', 'label-file-izq')">
+                <div class="file-input-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  <span id="label-file-izq">Arrastra o selecciona una imagen</span>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit" style="margin-top: 1rem; width: 100%;">Subir y Agregar</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Card Centro (Imagen / Texto) -->
+      <div class="admin-column">
+        <h2 class="column-title">Card Centro (img/txt)</h2>
+
+        <!-- Galería -->
+        <div class="control-card">
+          <h3 class="card-subtitle">Galería de Card Central</h3>
+          <div id="gallery-cen" class="gallery-grid">
+            <!-- Carga Dinámica -->
+          </div>
+        </div>
+
+        <!-- Formulario Texto -->
+        <div class="control-card">
+          <h3 class="card-subtitle">Agregar Texto / Mensaje</h3>
+          <form id="form-text-cen" onsubmit="handleTextUpload(event)">
+            <div class="form-group">
+              <span class="form-label">Contenido de texto a mostrar</span>
+              <textarea id="text-cen" class="text-area" placeholder="Escribe aquí una guía, reflexión o mensaje..."
+                required></textarea>
+            </div>
+            <button type="submit" class="btn-submit" style="margin-top: 1rem; width: 100%;">Agregar Mensaje</button>
+          </form>
+        </div>
+
+        <!-- Formulario Imagen -->
+        <div class="control-card">
+          <h3 class="card-subtitle">Subir Imagen</h3>
+          <form id="form-upload-cen" onsubmit="handleImageUpload(event, 'centro')">
+            <div class="form-group">
+              <span class="form-label">Seleccionar archivo de imagen</span>
+              <div class="file-input-wrapper">
+                <input type="file" id="file-cen" class="file-input-real" accept="image/*" required
+                  onchange="updateFileLabel('file-cen', 'label-file-cen')">
+                <div class="file-input-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  <span id="label-file-cen">Arrastra o selecciona una imagen</span>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit" style="margin-top: 1rem; width: 100%;">Subir y Agregar</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Columna Derecha (Usuarios Conectados) -->
+      <div class="admin-column">
+        <h2 class="column-title">Usuarios</h2>
+
+        <div class="control-card panel-usuarios">
+          <div class="usuarios-header">
+            <span id="lblTotalUsuarios" class="total-usuarios-label">Conectados: 0</span>
+            <button id="btnMuteAll" class="btn-mute-all" style="display: none;">
+              <!-- SVG Silenciar todos -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                <path d="M17 11a7 7 0 0 1-2.29 5.17M12 19v4M8 23h8"></path>
+              </svg>
+              Silenciar todos
+            </button>
+          </div>
+          <div id="lista-usuarios-conectados" class="usuarios-list-container">
+            <div
+              style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
+              Conectando con la sala...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Configuración dinámica de API_BASE_URL
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://127.0.0.1:8000/api'
+      : 'https://rosarioenvivo.com/api';
+
+    const token = localStorage.getItem('token_sala');
+    const userRole = localStorage.getItem('rol_usuario');
+
+    // Guardia de Ruta de Seguridad
+    if (!token || (userRole !== 'admin' && userRole !== 'moderador')) {
+      window.location.replace('login.html');
+    } else {
+      document.body.classList.add('ready');
+    }
+
+    // Referencias al SDK en tiempo real de RealtimeKit
+    let activeMeeting = null;
+    let activeMeetingId = null;
+    let recursosCache = [];
+
+    // Actualizar nombre del archivo seleccionado en el formulario
+    function updateFileLabel(inputId, labelId) {
+      const input = document.getElementById(inputId);
+      const label = document.getElementById(labelId);
+      if (input.files && input.files[0]) {
+        label.textContent = input.files[0].name;
+      } else {
+        label.textContent = "Arrastra o selecciona una imagen";
+      }
+    }
+
+    // Escapar HTML básico
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Cargar recursos del servidor
+    async function cargarRecursos() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/tablero/recursos`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Error al cargar la galería.');
+
+        recursosCache = await response.json();
+        renderizarGalerias();
+      } catch (err) {
+        console.error(err);
+        alert('Error al conectar con el servidor para obtener los recursos.');
+      }
+    }
+
+    // Renderizar las galerías izquierda y centro
+    function renderizarGalerias() {
+      const galleryIzq = document.getElementById('gallery-izq');
+      const galleryCen = document.getElementById('gallery-cen');
+
+      const recursosIzq = recursosCache.filter(r => r.ubicacion === 'izquierda');
+      const recursosCen = recursosCache.filter(r => r.ubicacion === 'centro');
+
+      // 1. Izquierda (Solo imágenes)
+      if (recursosIzq.length === 0) {
+        galleryIzq.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.9rem;">No hay imágenes cargadas para esta sección</div>';
+      } else {
+        galleryIzq.innerHTML = recursosIzq.map(r => `
+          <div class="gallery-item ${r.activoActual ? 'active' : ''}">
+            ${r.activoActual ? '<span class="active-badge">Activo</span>' : ''}
+            <div class="gallery-preview">
+              <img src="${r.contenido}" alt="Miniatura" />
+            </div>
+            <div class="gallery-info">
+              <div class="btn-action-group">
+                <button class="btn-activate" ${r.activoActual ? 'disabled' : ''} onclick="activarRecurso(${r.id})">
+                  ${r.activoActual ? 'Mostrando' : 'Activar'}
+                </button>
+                <button class="btn-delete" title="Eliminar" onclick="eliminarRecurso(${r.id})">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 2. Centro (Imágenes y Textos)
+      if (recursosCen.length === 0) {
+        galleryCen.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.9rem;">No hay recursos cargados para esta sección</div>';
+      } else {
+        galleryCen.innerHTML = recursosCen.map(r => `
+          <div class="gallery-item ${r.activoActual ? 'active' : ''}">
+            ${r.activoActual ? '<span class="active-badge">Activo</span>' : ''}
+            <div class="gallery-preview">
+              ${r.tipo === 'imagen'
+            ? `<img src="${r.contenido}" alt="Miniatura" />`
+            : `<div class="gallery-text-preview">${escapeHTML(r.contenido)}</div>`
+          }
+            </div>
+            <div class="gallery-info">
+              <div class="btn-action-group">
+                <button class="btn-activate" ${r.activoActual ? 'disabled' : ''} onclick="activarRecurso(${r.id})">
+                  ${r.activoActual ? 'Mostrando' : 'Activar'}
+                </button>
+                <button class="btn-delete" title="Eliminar" onclick="eliminarRecurso(${r.id})">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Activar un recurso por ID
+    async function activarRecurso(id) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/tablero/activar/${id}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Error al activar el recurso.');
+        cargarRecursos();
+      } catch (err) {
+        console.error(err);
+        alert('No se pudo activar el recurso.');
+      }
+    }
+
+    // Eliminar un recurso por ID
+    async function eliminarRecurso(id) {
+      if (!confirm('¿Estás seguro de que deseas eliminar este recurso?')) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/tablero/eliminar/${id}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Error al eliminar el recurso.');
+        cargarRecursos();
+      } catch (err) {
+        console.error(err);
+        alert('No se pudo eliminar el recurso.');
+      }
+    }
+
+    // Subir imagen (izquierda o centro)
+    async function handleImageUpload(e, ubicacion) {
+      e.preventDefault();
+      const inputId = ubicacion === 'izquierda' ? 'file-izq' : 'file-cen';
+      const fileInput = document.getElementById(inputId);
+      if (!fileInput.files || !fileInput.files[0]) return;
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('ubicacion', ubicacion);
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Subiendo...';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/tablero/upload`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.detail || 'Fallo la subida.');
+        }
+
+        fileInput.value = '';
+        updateFileLabel(inputId, ubicacion === 'izquierda' ? 'label-file-izq' : 'label-file-cen');
+        cargarRecursos();
+      } catch (err) {
+        console.error(err);
+        alert(`Error al subir imagen: ${err.message}`);
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Guardar texto en el centro
+    async function handleTextUpload(e) {
+      e.preventDefault();
+      const textArea = document.getElementById('text-cen');
+      const textVal = textArea.value.trim();
+      if (!textVal) return;
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Guardando...';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/tablero/texto`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contenido: textVal,
+            ubicacion: 'centro'
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.detail || 'Fallo el registro de texto.');
+        }
+
+        textArea.value = '';
+        cargarRecursos();
+      } catch (err) {
+        console.error(err);
+        alert(`Error al registrar el texto: ${err.message}`);
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Lógica para conectar y unirse a la sala en tiempo real de forma silenciosa
+    async function inicializarConexionRealtime() {
+      try {
+        const resVerif = await fetch(`${API_BASE_URL}/clase/verificar-acceso`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!resVerif.ok) throw new Error('Error al verificar acceso.');
+
+        const userData = await resVerif.json();
+        const username = userData.nombre_real || localStorage.getItem('nombre_real') || userData.usuario || 'Administrador';
+        const userId = userData.id_usuario ? String(userData.id_usuario) : (userData.usuario || username);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const claseId = urlParams.get('clase');
+
+        const response = await fetch(`${API_BASE_URL}/clase/crear-sala`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            client_specific_id: userId,
+            name: username,
+            preset_name: 'group_call_host',
+            title: "Sala Virtual",
+            clase_id: claseId ? parseInt(claseId) : null
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || errData.detail || 'La videoconferencia aún no está activa.');
+        }
+
+        const data = await response.json();
+        activeMeetingId = data.meeting_id;
+
+        if (!data.authToken) throw new Error('No se retornó token de sala.');
+
+        if (typeof window.RealtimeKitClient === 'undefined') {
+          throw new Error('El SDK de RealtimeKit no está cargado.');
+        }
+
+        const meeting = await window.RealtimeKitClient.init({
+          authToken: data.authToken,
+          apiBase: 'https://api.realtime.cloudflare.com',
+          baseURI: 'realtime.cloudflare.com',
+          defaults: { audio: false, video: false }
+        });
+
+        await meeting.join();
+        activeMeeting = meeting;
+        console.log("🔥 Admin conectado en tiempo real a la sala:", activeMeetingId);
+
+        configurarControladoresEventosRealtime(meeting);
+
+      } catch (err) {
+        console.error("Error al conectar en tiempo real:", err);
+        const listaCont = document.getElementById('lista-usuarios-conectados');
+        if (listaCont) {
+          listaCont.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
+              ${err.message.includes('videoconferencia') ? err.message : 'No hay sala activa en este momento.'}
+            </div>
+          `;
+        }
+      }
+    }
+
+    function configurarControladoresEventosRealtime(meeting) {
+      const listaCont = document.getElementById('lista-usuarios-conectados');
+      const lblTotal = document.getElementById('lblTotalUsuarios');
+      const btnMuteAll = document.getElementById('btnMuteAll');
+
+      if (btnMuteAll) {
+        btnMuteAll.style.display = 'inline-flex';
+        btnMuteAll.onclick = async () => {
+          const confirmar = confirm("¿Estás seguro de que deseas silenciar a todos los participantes conectados?");
+          if (!confirmar) return;
+          try {
+            btnMuteAll.disabled = true;
+            if (meeting.participants && meeting.participants.joined) {
+              const joinedArray = meeting.participants.joined.toArray();
+              for (const p of joinedArray) {
+                if (p.audioEnabled) {
+                  try {
+                    await p.disableAudio();
+                  } catch (e) {
+                    console.error(`Error silenciando al participante ${p.name}:`, e);
+                  }
+                }
+              }
+            }
+            if (meeting.self.audioEnabled) {
+              await meeting.self.disableAudio();
+            }
+            alert("Se ha solicitado silenciar a todos.");
+          } catch (err) {
+            console.error("Error al silenciar a todos:", err);
+          } finally {
+            btnMuteAll.disabled = false;
+          }
+        };
+      }
+
+      const actualizarTotalConectados = () => {
+        if (!lblTotal) return;
+        const count = 1 + (meeting.participants.joined ? meeting.participants.joined.size : 0);
+        lblTotal.textContent = `Conectados: ${count}`;
+      };
+
+      const getParticipantId = (p) => {
+        if (!p) return null;
+        if (typeof p === 'string') return p;
+        return p.peerId || p.id || null;
+      };
+
+      let currentActiveSpeakerId = null;
+
+      const quenchSpeakingHighlight = (speakerId) => {
+        if (!speakerId) return;
+        const prevEl = document.getElementById(`user-item-${speakerId}`);
+        if (prevEl) {
+          prevEl.classList.remove('speaking');
+          const dot = prevEl.querySelector('.usuario-status-dot');
+          if (dot) dot.classList.remove('speaking');
+        }
+        if (currentActiveSpeakerId === speakerId) {
+          currentActiveSpeakerId = null;
+        }
+      };
+
+      const updateActiveSpeakerUI = (speakerId) => {
+        if (currentActiveSpeakerId === speakerId) return;
+
+        if (currentActiveSpeakerId) {
+          const prevEl = document.getElementById(`user-item-${currentActiveSpeakerId}`);
+          if (prevEl) {
+            prevEl.classList.remove('speaking');
+            const dot = prevEl.querySelector('.usuario-status-dot');
+            if (dot) dot.classList.remove('speaking');
+          }
+        }
+
+        currentActiveSpeakerId = speakerId;
+        if (speakerId) {
+          const isLocal = speakerId === meeting.self.id;
+          const pObj = isLocal ? meeting.self : (meeting.participants.joined ? meeting.participants.joined.get(speakerId) : null);
+
+          if (pObj && pObj.audioEnabled) {
+            const currentEl = document.getElementById(`user-item-${speakerId}`);
+            if (currentEl) {
+              currentEl.classList.add('speaking');
+              const dot = currentEl.querySelector('.usuario-status-dot');
+              if (dot) dot.classList.add('speaking');
+            }
+          } else {
+            currentActiveSpeakerId = null;
+          }
+        }
+      };
+
+      const dibujarUsuarioEnLista = (id, nombre, audioEnabled = true, isLocal = false) => {
+        if (!listaCont) return;
+
+        const loadingEl = listaCont.querySelector('div');
+        if (loadingEl && (loadingEl.textContent.includes('Conectando') || loadingEl.textContent.includes('Cargando'))) {
+          listaCont.innerHTML = '';
+        }
+
+        let card = document.getElementById(`user-item-${id}`);
+        if (!card) {
+          card = document.createElement('div');
+          card.id = `user-item-${id}`;
+          card.className = 'usuario-list-item';
+          listaCont.appendChild(card);
+        }
+
+        const rawName = nombre || 'Usuario';
+        const validName = rawName.length > 25
+          ? rawName.substring(0, 22) + '...'
+          : rawName;
+
+        const escapeAttribute = (str) => (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const escapedName = escapeAttribute(rawName);
+
+        let actionsHtml = '';
+        const muteClass = audioEnabled ? '' : 'muted';
+        const muteIcon = audioEnabled ? '🎤' : '🔇';
+
+        if (isLocal) {
+          actionsHtml = `
+            <div class="usuario-actions">
+              <button class="btn-user-action btn-mute-user ${muteClass}" id="mute-btn-${id}" title="Silenciar mi micrófono">
+                ${muteIcon}
+              </button>
+            </div>
+          `;
+        } else {
+          actionsHtml = `
+            <div class="usuario-actions">
+              <button class="btn-user-action btn-mute-user ${muteClass}" id="mute-btn-${id}" title="Silenciar participante">
+                ${muteIcon}
+              </button>
+              <button class="btn-user-action btn-kick-user" id="kick-btn-${id}" title="Expulsar de la sala">
+                ❌
+              </button>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          ${actionsHtml}
+          <span class="usuario-name" title="${escapedName}">${escapedName}${isLocal ? ' (Tú)' : ''}</span>
+          <span class="usuario-status-dot ${audioEnabled ? 'active' : ''}"></span>
+        `;
+
+        const muteBtn = card.querySelector(`#mute-btn-${id}`);
+        if (muteBtn) {
+          muteBtn.onclick = async () => {
+            try {
+              muteBtn.disabled = true;
+              if (isLocal) {
+                if (meeting.self.audioEnabled) {
+                  await meeting.self.disableAudio();
+                } else {
+                  await meeting.self.enableAudio();
+                }
+              } else {
+                const participant = meeting.participants.joined.get(id);
+                if (participant) {
+                  if (participant.audioEnabled) {
+                    await participant.disableAudio();
+                  } else {
+                    if (typeof participant.enableAudio === 'function') {
+                      await participant.enableAudio();
+                    }
+                  }
+                }
+              }
+            } catch (err) {
+              console.error("Error al cambiar estado de audio:", err);
+            } finally {
+              muteBtn.disabled = false;
+            }
+          };
+        }
+
+        const kickBtn = card.querySelector(`#kick-btn-${id}`);
+        if (kickBtn) {
+          kickBtn.onclick = async () => {
+            const confirmar = confirm(`¿Estás seguro de que deseas expulsar a ${rawName} de la sala?`);
+            if (!confirmar) return;
+            try {
+              kickBtn.disabled = true;
+              const participant = meeting.participants.joined.get(id);
+              if (participant) {
+                await participant.kick();
+              }
+            } catch (err) {
+              console.error("Error al expulsar al participante:", err);
+              alert("No se pudo expulsar al participante.");
+            } finally {
+              kickBtn.disabled = false;
+            }
+          };
+        }
+
+        actualizarTotalConectados();
+      };
+
+      const updateParticipantMicUI = (id, audioEnabled) => {
+        const card = document.getElementById(`user-item-${id}`);
+        if (card) {
+          const dot = card.querySelector('.usuario-status-dot');
+          if (dot) {
+            if (audioEnabled) {
+              dot.classList.add('active');
+            } else {
+              dot.classList.remove('active');
+            }
+          }
+
+          const muteBtn = card.querySelector(`#mute-btn-${id}`);
+          if (muteBtn) {
+            if (audioEnabled) {
+              muteBtn.classList.remove('muted');
+              muteBtn.innerHTML = '🎤';
+            } else {
+              muteBtn.classList.add('muted');
+              muteBtn.innerHTML = '🔇';
+            }
+          }
+        }
+      };
+
+      const removerUsuarioDeLista = (id) => {
+        const card = document.getElementById(`user-item-${id}`);
+        if (card) {
+          card.remove();
+        }
+        quenchSpeakingHighlight(id);
+        actualizarTotalConectados();
+      };
+
+      // Dibujar usuario local
+      dibujarUsuarioEnLista(meeting.self.id, meeting.self.name, meeting.self.audioEnabled, true);
+
+      meeting.self.on('audioUpdate', ({ audioEnabled }) => {
+        updateParticipantMicUI(meeting.self.id, audioEnabled);
+        if (!audioEnabled) {
+          quenchSpeakingHighlight(meeting.self.id);
+        }
+      });
+
+      // Dibujar participantes remotos previos y registrar eventos
+      if (meeting.participants && meeting.participants.joined) {
+        const participantesPrevios = meeting.participants.joined.toArray();
+        participantesPrevios.forEach(p => {
+          dibujarUsuarioEnLista(p.id, p.name, p.audioEnabled, false);
+        });
+
+        meeting.participants.joined.on('participantJoined', (participant) => {
+          dibujarUsuarioEnLista(participant.id, participant.name, participant.audioEnabled, false);
+        });
+
+        meeting.participants.joined.on('audioUpdate', (participant) => {
+          const pId = getParticipantId(participant);
+          updateParticipantMicUI(pId, participant.audioEnabled);
+          if (!participant.audioEnabled) {
+            quenchSpeakingHighlight(pId);
+          }
+        });
+
+        meeting.participants.joined.on('participantLeft', (participant) => {
+          const pId = getParticipantId(participant);
+          removerUsuarioDeLista(pId);
+        });
+      }
+
+      meeting.participants.on('activeSpeaker', (participant) => {
+        const speakerId = getParticipantId(participant);
+        updateActiveSpeakerUI(speakerId);
+      });
+    }
+
+    // Inicializar al cargar
+    if (token && (userRole === 'admin' || userRole === 'moderador')) {
+      cargarRecursos();
+      inicializarConexionRealtime();
+    }
+
+    // Liberación de hardware en caso de cierre de pestaña
+    window.addEventListener('pagehide', () => {
+      if (activeMeeting) {
+        activeMeeting.leave().catch(err => console.error("Error de desconexión en pagehide:", err));
+      }
+    });
+  </script>
+</body>
+
+</html>
