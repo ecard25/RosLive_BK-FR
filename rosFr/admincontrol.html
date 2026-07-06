@@ -120,12 +120,12 @@
     .admin-column {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 0.9rem;
     }
 
     .column-title {
       font-size: 1.35rem;
-      font-weight: 700;
+      font-weight: normal;
       color: var(--text-main);
       border-bottom: 2px solid var(--primary);
       padding-bottom: 0.5rem;
@@ -159,7 +159,7 @@
     }
 
     .total-usuarios-label {
-      font-size: 0.95rem;
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--text-main);
     }
@@ -168,9 +168,9 @@
       background-color: #feb2b2;
       color: #9b2c2c;
       border: 1px solid #fc8181;
-      padding: 0.35rem 0.75rem;
+      padding: 0.25rem 0.75rem;
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.5rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -314,8 +314,8 @@
     .control-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 1.5rem;
+      border-radius: 8px;
+      padding: 0.5rem;
       box-shadow: var(--shadow-card);
       display: flex;
       flex-direction: column;
@@ -324,7 +324,7 @@
 
     .card-subtitle {
       font-size: 1.05rem;
-      font-weight: 600;
+      font-weight: normal;
       color: var(--text-main);
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 0.5rem;
@@ -418,13 +418,13 @@
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
+      gap: 0.5rem;
     }
 
     .gallery-item {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
+      border-radius: 5px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -444,15 +444,19 @@
 
     .active-badge {
       position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
+      top: 0.4rem;
+      right: 0.4rem;
       background: var(--success);
       color: white;
-      font-size: 0.6rem;
-      font-weight: 700;
-      padding: 0.15rem 0.4rem;
-      border-radius: 50px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-size: 0.5rem;
+      font-weight: 800;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
     .gallery-preview {
@@ -472,8 +476,8 @@
     }
 
     .gallery-text-preview {
-      padding: 0.5rem;
-      font-size: 0.75rem;
+      padding: 0.2rem;
+      font-size: 0.45rem;
       color: var(--text-main);
       overflow-y: auto;
       height: 100%;
@@ -486,7 +490,7 @@
     }
 
     .gallery-info {
-      padding: 0.5rem;
+      padding: 0.3rem;
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
@@ -505,7 +509,7 @@
       border: none;
       padding: 0.35rem;
       border-radius: 6px;
-      font-size: 0.55rem;
+      font-size: 0.45rem;
       cursor: pointer;
       transition: all 0.2s ease;
       text-align: center;
@@ -567,7 +571,20 @@
 
   <!-- Contenedor Principal -->
   <main class="admin-container">
-    <h1 class="panel-title">Control de Tablero</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h1 class="panel-title" style="margin-bottom: 0;">Control de Tablero</h1>
+      <button id="btnEndMeeting" class="btn-submit"
+        style="background-color: var(--danger); font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 8px; display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right: 0.4rem;">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+        </svg>
+        Finalizar sala para todos
+      </button>
+    </div>
 
     <!-- Contenedor de Columnas en Paralelo -->
     <div class="admin-columns-container">
@@ -578,7 +595,7 @@
 
         <!-- Galería -->
         <div class="control-card">
-          <h3 class="card-subtitle">Galería de Card Izq</h3>
+
           <div id="gallery-izq" class="gallery-grid">
             <!-- Carga Dinámica -->
           </div>
@@ -615,7 +632,6 @@
 
         <!-- Galería -->
         <div class="control-card">
-          <h3 class="card-subtitle">Galería de Card Central</h3>
           <div id="gallery-cen" class="gallery-grid">
             <!-- Carga Dinámica -->
           </div>
@@ -679,8 +695,13 @@
           </div>
           <div id="lista-usuarios-conectados" class="usuarios-list-container">
             <div
-              style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-              Conectando con la sala...
+              style="text-align: center; padding: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+              <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">La transmisión de audio no
+                está iniciada.</span>
+              <button id="btnStartConnection" class="btn-submit"
+                style="font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 6px; width: auto;">
+                Iniciar Sala / Conectar
+              </button>
             </div>
           </div>
         </div>
@@ -766,14 +787,14 @@
       } else {
         galleryIzq.innerHTML = recursosIzq.map(r => `
           <div class="gallery-item ${r.activoActual ? 'active' : ''}">
-            ${r.activoActual ? '<span class="active-badge">Activo</span>' : ''}
+            ${r.activoActual ? '<span class="active-badge">✓</span>' : ''}
             <div class="gallery-preview">
               <img src="${r.contenido}" alt="Miniatura" />
             </div>
             <div class="gallery-info">
               <div class="btn-action-group">
                 <button class="btn-activate" ${r.activoActual ? 'disabled' : ''} onclick="activarRecurso(${r.id})">
-                  ${r.activoActual ? 'Mostrando' : 'Activar'}
+                  ${r.activoActual ? 'Activo' : 'Activar'}
                 </button>
                 <button class="btn-delete" title="Eliminar" onclick="eliminarRecurso(${r.id})">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -790,7 +811,7 @@
       } else {
         galleryCen.innerHTML = recursosCen.map(r => `
           <div class="gallery-item ${r.activoActual ? 'active' : ''}">
-            ${r.activoActual ? '<span class="active-badge">Activo</span>' : ''}
+            ${r.activoActual ? '<span class="active-badge">✓</span>' : ''}
             <div class="gallery-preview">
               ${r.tipo === 'imagen'
             ? `<img src="${r.contenido}" alt="Miniatura" />`
@@ -800,7 +821,7 @@
             <div class="gallery-info">
               <div class="btn-action-group">
                 <button class="btn-activate" ${r.activoActual ? 'disabled' : ''} onclick="activarRecurso(${r.id})">
-                  ${r.activoActual ? 'Mostrando' : 'Activar'}
+                  ${r.activoActual ? 'Activo' : 'Activar'}
                 </button>
                 <button class="btn-delete" title="Eliminar" onclick="eliminarRecurso(${r.id})">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -993,17 +1014,21 @@
         activeMeeting = meeting;
         console.log("🔥 Admin conectado en tiempo real a la sala:", activeMeetingId);
 
+        // Mostrar botón finalizar sala para todos
+        const btnEnd = document.getElementById('btnEndMeeting');
+        if (btnEnd) btnEnd.style.display = 'inline-flex';
+
         configurarControladoresEventosRealtime(meeting);
 
       } catch (err) {
         console.error("Error al conectar en tiempo real:", err);
-        const listaCont = document.getElementById('lista-usuarios-conectados');
-        if (listaCont) {
-          listaCont.innerHTML = `
-            <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-              ${err.message.includes('videoconferencia') ? err.message : 'No hay sala activa en este momento.'}
-            </div>
-          `;
+        alert(`No se pudo conectar a la sala: ${err.message}`);
+
+        // Restaurar estado del botón de conexión
+        const btnStart = document.getElementById('btnStartConnection');
+        if (btnStart) {
+          btnStart.disabled = false;
+          btnStart.textContent = "Iniciar Sala / Conectar";
         }
       }
     }
@@ -1285,10 +1310,114 @@
       });
     }
 
+    const btnEndMeeting = document.getElementById('btnEndMeeting');
+    if (btnEndMeeting) {
+      btnEndMeeting.onclick = async () => {
+        const confirmar = confirm("⚠️ ¿Estás seguro de que deseas finalizar la sala permanentemente para todos los participantes?");
+        if (!confirmar) return;
+
+        try {
+          btnEndMeeting.disabled = true;
+          const originalText = btnEndMeeting.innerHTML;
+          btnEndMeeting.textContent = "Finalizando...";
+
+          const url = activeMeetingId
+            ? `${API_BASE_URL}/sala/forzar_cierre?meeting_id=${activeMeetingId}`
+            : `${API_BASE_URL}/sala/forzar_cierre`;
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!res.ok) {
+            throw new Error('Error al cerrar la sala en el servidor.');
+          }
+
+          alert("La sala ha sido finalizada de forma permanente para todos los usuarios.");
+
+          if (activeMeeting) {
+            try {
+              await activeMeeting.leave();
+            } catch (e) {
+              console.error("Error al desconectarse del SDK localmente:", e);
+            }
+          }
+
+          // Limpiar variables globales
+          activeMeeting = null;
+          activeMeetingId = null;
+
+          // Ocultar botón de finalización
+          btnEndMeeting.style.display = 'none';
+          btnEndMeeting.disabled = false;
+          btnEndMeeting.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.4rem;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+            </svg>
+            Finalizar sala para todos
+          `;
+
+          // Ocultar botón Silenciar todos
+          const btnMuteAll = document.getElementById('btnMuteAll');
+          if (btnMuteAll) btnMuteAll.style.display = 'none';
+
+          // Restablecer label de total de conectados
+          const lblTotal = document.getElementById('lblTotalUsuarios');
+          if (lblTotal) lblTotal.textContent = 'Conectados: 0';
+
+          // Reestablecer la lista de usuarios al estado desconectado
+          const listaCont = document.getElementById('lista-usuarios-conectados');
+          if (listaCont) {
+            listaCont.innerHTML = `
+              <div style="text-align: center; padding: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">La transmisión de audio no está iniciada.</span>
+                <button id="btnStartConnection" class="btn-submit" style="font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 6px; width: auto;">
+                  Iniciar Sala / Conectar
+                </button>
+              </div>
+            `;
+          }
+
+          // Volver a configurar el botón de conexión inicial
+          configurarBotonConectarInicial();
+
+        } catch (err) {
+          console.error("Error al forzar cierre de sala:", err);
+          alert("Ocurrió un error al intentar finalizar la sala.");
+          btnEndMeeting.disabled = false;
+          btnEndMeeting.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.4rem;">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+            </svg>
+            Finalizar sala para todos
+          `;
+        }
+      };
+    }
+
+    function configurarBotonConectarInicial() {
+      const btnStart = document.getElementById('btnStartConnection');
+      if (btnStart) {
+        btnStart.onclick = async () => {
+          btnStart.disabled = true;
+          btnStart.textContent = "Conectando...";
+          await inicializarConexionRealtime();
+        };
+      }
+    }
+
     // Inicializar al cargar
     if (token && (userRole === 'admin' || userRole === 'moderador')) {
       cargarRecursos();
-      inicializarConexionRealtime();
+      configurarBotonConectarInicial();
     }
 
     // Liberación de hardware en caso de cierre de pestaña

@@ -497,13 +497,25 @@
       width: 100%;
     }
 
+    .sala-panel-cardI {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0rem;
+      box-shadow: var(--shadow-soft);
+      height: 406px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
     .sala-panel-card {
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 1.2rem;
       box-shadow: var(--shadow-soft);
-      height: 400px;
+      height: 406px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -637,8 +649,24 @@
 
       .sala-paneles-container {
         grid-template-columns: 1fr;
-        padding: 0.75rem;
+        padding: 0.1rem 0.1rem 0.4rem 0.1rem;
         gap: 0.75rem;
+      }
+
+      .sala-panel-cardI {
+
+        height: 200px;
+        padding: 0rem;
+        background-color: var(--bg-main) !important;
+        border: none;
+      }
+
+      .sala-panel-cardI img {
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        border-radius: 12px !important;
       }
 
       .sala-panel-card {
@@ -686,7 +714,7 @@
         <!-- Sección de Paneles Informativos (3 partes) -->
         <div class="sala-paneles-container">
           <!-- Parte 1: Espacio para Imagen -->
-          <div id="panel-izquierda" class="sala-panel-card panel-imagen"
+          <div id="panel-izquierda" class="sala-panel-cardI panel-imagen"
             style="justify-content: center; align-items: center; background: #f7fafc;">
             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
               stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
